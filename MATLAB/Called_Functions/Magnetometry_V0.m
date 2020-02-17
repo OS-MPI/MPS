@@ -1,4 +1,4 @@
-function [X,Y,m2] = MagnetometryV7(Data,startpoint,endpoint,smoothPts,Fb,Conc,Fs,Fd, Line,DrivemT)
+function [X,Y,m2] = Magnetometry_V0(Data,startpoint,endpoint,smoothPts,Fb,Conc,Fs,Fd, Line,DrivemT)
 Gain = 100;
 Turns_Rx = 450;
 Wire_D_Rx = 0.15e-3;%m
@@ -16,18 +16,6 @@ end
 
 BulbVol = 18e-9; %m^3
 DataScaled = Data(:,1)/(P_Rx*Gain*DrivemT/1000*Fd*BulbVol);
-
-%M(H) = Chi*H(t) = Chi[UL]*I[amps]*P_Tx[A/M/A]*sin(2*pi*f*t)
-%dM/dt = Chi*I*P_Tx*2*pi*f*cos(2*pi*f*t)
-%dM/dt*mu0 = Chi* DrivemT*f*cos(2*pi*f*t)
-%V(t) = P_Rx*Gain*mu0*dM/dt*Vol =  P_Rx*Gain* Chi* DrivemT*f*cos(2*pi*f*t)*Vol
-%V(t)/(P_Rx*Gain*DrivemT*f*Vol) = Chi*cos(2*pi*f*t)
-%[kg*m^2*s^-3*A^-1]/[m^-1*kg*A^-1*s^-2*s*-1*m^3] 
-
-%dM/dt = Chi*I*P_Tx*2*pi*f*cos(2*pi*f*t)
-
-
-
 
 
 DataSig = DataScaled;

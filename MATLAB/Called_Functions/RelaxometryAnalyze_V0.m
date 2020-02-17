@@ -1,9 +1,18 @@
 %% Relaxometery
+
+%This function is very prelimenary, it takes magnetometry data,
+%interpolates it by a "scale factor" and then looks at rising and falling
+%edges separately. The determination of the amplitudes is where it becomes
+%tricky because it is no longer a sinusoid (more akin to a saw tooth
+%wave)-- just taking a running average works not great and should be
+%improved.
+
+
 clear
 % load('VivoAgar_15mTDrive_75mTBias_25kHz_Relx.mat') ; Col='r';
 % load('Vivo2020_15mTDrive_75mTBias_25kHz_Relx.mat') ; Col = 'b';
 % load('Ocean_15mTDrive_75mTBias_25kHz_Relx.mat'); Col = 'g';
-load('Azano_15mTDrive_75mTBias_25kHz_Relx.mat'); Col = 'm';
+% load('Azano_15mTDrive_75mTBias_25kHz_Relx.mat'); Col = 'm';
 
 Data_Sig = AllData;
 Fd = 24.3e3;

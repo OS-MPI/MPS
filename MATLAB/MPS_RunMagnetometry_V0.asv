@@ -134,16 +134,10 @@ writeDigitalPin(a,EnablePin,1)
 [AmplitudeMax, BulbLocation]=max(F0Mag);
 BulbLocation=BulbLocation+200;
 %% Detection
-% This mode should be used if you are uncertain if there are particles, it
-% was developed for a collaborator who had samples but was uncertain if any
-% superparamagnetic material was included. ~100-200 ng can be confidently
-% be detected.
-
 
 %This section runs the sample in and out while simultaneously recording the
 %collected data can be compared to a sensitivity profile and the signal's
-%fit to the sensitivity profile corresponds to the likelihood SPIO particles are
-%being scanned
+%fit to the sensitivity profile corresponds to the 
 
 writeDigitalPin(a,EnablePin,0)
 writeDigitalPin(a,DirPin,1)

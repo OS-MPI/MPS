@@ -1,7 +1,8 @@
 function [FPickAmp] = FourierAnalyze_v2(Data,Fs,F0,DiscSamples,FPick)
 %The name is somewhat residual (it analyzes the magnitudes using a FT as 
-%opposed to RMS or other means which dont take the frequency into account,
-%but this function just picks the amplitude of a certain frequency of a vector over time. 
+%opposed to RMS or other means which dont take the frequency into account
+, but this function just picks the amplitude
+%of a certain frequency of a vector over time. 
 
 %DiscSamples is the number of discrete samples per FT analysis
 plotFT(Data(:,1),Fs,F0,3,'b',0);
