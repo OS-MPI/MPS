@@ -1,18 +1,6 @@
 % close all
 clear all
 
-%%
-
-%This script is to operate in "spectroscopy mode" meaning that it will
-%excite the particles at the Tx frequency and a high amplitude (enough to
-%elicit non-linearities) and then evaluate the frequency spectra of these
-%signals. This can be thought of what is happening at the FFL/FFP during
-%imaging (if the FFL/FFP isnt moving quickly)
-
-
-%%
-
-
 d  = daq.getDevices;
 devID = d(1).ID;
 s = daq.createSession('ni');
@@ -44,17 +32,16 @@ fBias = 4;
 
 RepeatTests = 5;
 MeasureTime = 4;
-
-Concentration =input('Concentration = ');
-
+Concentration =0.5;
 PTime = 2;
 Ch1 = addAnalogInputChannel(s,devID,'ai1','Voltage');
 Ch1.TerminalConfig = 'SingleEnded';
-if OnlyRx==0 %By only measuring only the Rx and not current as well, you can increase the sampling rate
+if OnlyRx==0
     Ch3 = addAnalogInputChannel(s,devID,'ai3','Voltage');
     Ch3.TerminalConfig = 'SingleEnded';
 end
 AO0 = addAnalogOutputChannel(s,devID,'ao0','Voltage');
+% AO1 = addAnalogOutputChannel(s,devID,'ao1','Voltage');
 
 a = arduino();
 Step = 'A0';
@@ -70,8 +57,8 @@ IndexMax=231;
 %% adjust gradiometer
 figure(2),clf
 figure(1),clf
-
-M=100;
+% for K = 1:2
+M=1;
 FMag = zeros(1,M);
 for i = 1:M
     data = SendData(s,DriveAmp,0,fs,1, fBias, fDrive);
@@ -86,7 +73,9 @@ for i = 1:M
         xlim([0 i])
     end
 end
-
+% K
+% Noise = std(F0Mag)/2.23/100*1e9
+% end
 %% Run N points to position sample
 writeDigitalPin(a,'D3',0)
 writeDigitalPin(a,'D5',1)
@@ -165,7 +154,7 @@ for LoopNum=1:RepeatTests
     
     data = SendData(s,DriveAmp,fs,MeasureTime, fDrive);
     Data_NoSample = data;
-    
+    %BiasData2 = data(:,2)-mean(data(:,2));
     writeDigitalPin(a,'D3',0)
     writeDigitalPin(a,'D5',0)
     for j=1:10
