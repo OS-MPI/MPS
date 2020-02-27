@@ -1,4 +1,7 @@
 # The Magnetic Particle Spectroscopy (MPS) device
+# [Link to the wiki](https://github.com/OS-MPI/MPS/wiki)
+
+<img src="Figures_For_Wiki/MPS_System_Photo_1.jpg">
 
 ## Motivation and Introduction
 
