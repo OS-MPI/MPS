@@ -44,7 +44,7 @@ X(X(2:end)==X(1:end-1))=[];
 X(MParticle(2:end)==MParticle(1:end-1))=[];
 MParticle(MParticle(2:end)==MParticle(1:end-1))=[];
 
-M = interp1(X,MParticle,H,'spline');
+M = interp1(X,MParticle,H,'linear','extrap');
 
 end
 

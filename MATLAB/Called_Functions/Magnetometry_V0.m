@@ -1,4 +1,4 @@
-function [BiasField,MagSuscept,Mag] = Magnetometry_V0(Data,startpoint,endpoint,smoothPts,Fb,Conc,Fs,Fd, Line,DrivemT)
+function [BiasField,MagSuscept,Mag] = Magnetometry_V0(Data,startpoint,endpoint,smoothPts,Fb,Conc,Fs,Fd, Line,DrivemT,Normalize)
 Gain = 100; %Preamp gain
 Turns_Rx = 450; %turns on half of gradiometer
 Wire_D_Rx = 0.15e-3;%m
@@ -39,11 +39,14 @@ LPCroppedSig = LPCroppedSig(1:length(LPBiasCrop)); %Matching lengths
 
 
 m = zeros(round(Fs/(2*Fb)),1);%m = magnetic moment
+StartingPoint = find(abs(LPBiasCrop(1:round(length(LPBiasCrop)/2))) == min(abs(LPBiasCrop(1:round(length(LPBiasCrop)/2)))), 1 )+round(Fs/(4*Fb)); %location in the vector closest to zero- DC bias
 for K=1:2
-    StartingPoint = find(abs(LPBiasCrop) == min(abs(LPBiasCrop)), 1 )+round(Fs/(4*Fb)); %location in the vector closest to zero- DC bias
+    
     if K==2; StartingPoint=StartingPoint+round(Fs/(2*Fb)); end
-    Chi = repmat(LPCroppedSig,1,2);
-    LPBiasCrop = repmat(LPBiasCrop,1,2);
+    if K==1
+        Chi = repmat(LPCroppedSig,1,2);
+        LPBiasCrop = repmat(LPBiasCrop,1,2);
+    end
     
     BiasField = LPBiasCrop(StartingPoint:StartingPoint+round(Fs/(2*Fb)));
     MagSuscept = Chi(StartingPoint:StartingPoint+round(Fs/(2*Fb)));
@@ -58,14 +61,22 @@ for K=1:2
 
     
 end
-figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i))
+if Normalize==1
+    figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i)/max(abs(MagSuscept(1:i))))
+else
+    figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i))
+end
 hold on
 xlabel('External Magnetic Field [T]')
 ylabel('dM/dH')
 m(:,1)=flipud(m(:,1));
 m2=mean(m,2);
 Mag = m2/(4*pi*10e-7)/Conc;% Conc is is mg/ml which is also kg/m^3
-figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag,Line,'LineWidth',1.3)
+if Normalize==1
+    figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag/max(abs(Mag)),Line,'LineWidth',1.3)
+else
+    figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag,Line,'LineWidth',1.3)
+end
 xlabel('External Magnetic Field [T]')
 ylabel('Magnetization [Am^2/kg]')
 %legend('VivoTrax', 'Ocean NanoTech', 'Location', 'SE')

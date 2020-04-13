@@ -1,7 +1,4 @@
-% close all
-clear all
 
-%%
 
 %This script is currently organized in sections which should be run
 %independently. e.g. it doesnt usually make sense to run it top to bottom
@@ -10,6 +7,9 @@ clear all
 
 
 %%
+% close all
+clear all
+addpath([pwd '\Called_Functions'])
 
 d  = daq.getDevices;
 devID = d(1).ID;
@@ -18,7 +18,7 @@ s = daq.createSession('ni');
 
 
 
-DrivemT = 15;
+DrivemT = 5;
 % fDrive = 10.7e3;
 fDrive = 24.3e3;
 % fDrive = 40e3;
@@ -35,12 +35,24 @@ elseif fDrive == 40e3
 end
 fs = s.Rate;
 DriveAmp = DrivemT/mTpermVApex/1000;
-BiasAmp = 3;
-fBias = 4;
+BiasAmp = 1;
+fBias = 20;
 RepeatTests = 1; %Number of times "Magnetometry" will be averaged
 MeasureTime = 4; %Seconds per acquisition phase
-
+    Drive.Name = 'Apex PA12A'; %Drive Amplifier name
+    Drive.Volts = num2str(DriveAmp); 
+    Drive.mT = num2str(DrivemT);
+    Drive.Freq = num2str(fDrive);
+    Drive.PowerSupplyName= 'BK Precision';
+    Bias.Name = 'Crown XTi2002';
+    Bias.Volts = num2str(BiasAmp);
+    Bias.mT = num2str(0);
+    Bias.Freq = num2str(fBias);
 Concentration =input('Concentration = ');
+Name = input('Test name for save');
+Particles = input('Particle name');
+
+
 PTime = 2;%Pause time between phases -- can be used to lower duty cycle if there is heating issues
 Ch1 = addAnalogInputChannel(s,devID,'ai1','Voltage');
 Ch1.TerminalConfig = 'SingleEnded';
@@ -51,6 +63,9 @@ AO1 = addAnalogOutputChannel(s,devID,'ao1','Voltage');
 
 a = arduino();
 Step = 'A0';
+DirPin = 'D5';
+EnablePin = 'D3';
+ButtonPin = 'D4';
 configurePin(a,DirPin,'DigitalOutput') %direction
 writeDigitalPin(a,DirPin,1) %1 left, 0 right
 configurePin(a,Step,'DigitalOutput') %step
@@ -308,6 +323,7 @@ norm_BiasData=(BiasData_OnePeriod-mean(BiasData_OnePeriod))/max(abs(BiasData_One
 figure,plot(tBiasPeriod,norm_SignalData, 'b')
 hold on
 plot(tBiasPeriod,norm_BiasData, 'r')
+title(Name)
 xlabel('Time [s]')
 legend('measured Rx voltage (normalized and background subtracted)','measured Bias current (Hall, normalized)','Location','northwest')
 disp(num2str(LoopNum))
@@ -318,10 +334,11 @@ Shift=220; %This shifts the bias points and corresponds to the delay due to eddy
 SmoothBias = smooth(BiasData_OnePeriod,20); %Simple running average smoothing
 ShiftedBias = [SmoothBias(end-Shift:end);SmoothBias(1:end-Shift-1)];
 DataNew = [SignalData_OneBiasPeriod,ShiftedBias];
-DataRep = repmat(DataNew,2,1);%By repeating the signal it limits likelihood of errors later on
-[X,Y,m]=Magnetometry_V0(DataRep,1,size(SignalData_OneBiasPeriod,1),50,fBias,Concentration,fs,fDrive, '-',DrivemT);
+Data.DataRep = repmat(DataNew,2,1);%By repeating the signal it limits likelihood of errors later on
+[Data.BiasFieldVector,Data.Susceptibility,Data.Magnetization]=Magnetometry_V0(Data.DataRep,1,size(SignalData_OneBiasPeriod,1),50,fBias,Concentration,fs,fDrive, '-',DrivemT);
 % [SignalSim,MSim] = SignalSim_Experimental(X(2:end),m,.040,fs,10000,3);
 
+ExportData_V0(Name,Concentration,Particles,RepeatTests,'Magnetometry',MeasureTime,fs,Drive,Bias,Data,0,0,0)
 
 
 %%
