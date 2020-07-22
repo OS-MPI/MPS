@@ -1,4 +1,4 @@
-function [] = ExportData_V0(Name,Concentration,Particles,RepeatTests,Type,AcqTime,fs,Drive,Bias,Data,RelaxOutputs,RelaxColors,f,FTMagnitude,FTPhase,SaveFig)
+function [] = ExportData_V0(Name,Concentration,Particles,RepeatTests,Type,AcqTime,fs,Drive,Bias,Data,f,FTMagnitude,FTPhase,SaveFig)
 DateToday = date;
 
 NameSame_Orig = ['DataTemp/' DateToday,'/' Name];
@@ -58,7 +58,6 @@ writetable(BasicData,[NameSame_New,'/',Name,'.txt'])
 % ylabel('Magnetization [a.u.]')
 figure(SaveFig)
 savefig([NameSame_New,'/',Name])
-clear SaveFig
 save([NameSame_New,'/',Name])
 
 

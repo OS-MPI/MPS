@@ -5,7 +5,7 @@ function [FAmp,FPhase] = FourierAmplitude_2(Data,Fs,F0,~)
 
 
 %DiscSamples is the number of discrete samples per FT analysis
-Data = Data(1:end-mod(length(Data),Fs/(F0))); %Crops the data such that there is an inter number of drive periods
+Data = Data(1:end-mod(length(Data),Fs/(F0))); %Crops the data such that there is an integer number of drive periods
 
 if mod(length(Data),2)==1 % Makes sure that there is an even number of drive samples
     Data = Data(1:end-Fs/F0);

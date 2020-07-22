@@ -18,7 +18,7 @@ s = daq.createSession('ni');
 
 
 
-DrivemT = 5;
+DrivemT = 15;
 % fDrive = 10.7e3;
 fDrive = 24.3e3;
 % fDrive = 40e3;
@@ -28,14 +28,14 @@ if fDrive==10.7e3
     s.Rate=246.1e3;
 elseif fDrive ==24.3e3
     mTpermVApex = 0.0416; %24.3 kHz
-    s.Rate=243e3;
+    s.Rate=243e3*2;
 elseif fDrive == 40e3
     mTpermVApex = 0.0376; %40.0 kHz
     s.Rate=240e3;
 end
 fs = s.Rate;
 DriveAmp = DrivemT/mTpermVApex/1000;
-BiasAmp = 1;
+BiasAmp = 1.3;
 fBias = 20;
 RepeatTests = 1; %Number of times "Magnetometry" will be averaged
 MeasureTime = 4; %Seconds per acquisition phase
@@ -49,17 +49,22 @@ MeasureTime = 4; %Seconds per acquisition phase
     Bias.mT = num2str(0);
     Bias.Freq = num2str(fBias);
 Concentration =input('Concentration = ');
+% Concentration = 0;
 Name = input('Test name for save');
+% Name = 'Test';
 Particles = input('Particle name');
+% Particles = 'Test';
 
 
-PTime = 2;%Pause time between phases -- can be used to lower duty cycle if there is heating issues
+PTime = .1;%Pause time between phases -- can be used to lower duty cycle if there is heating issues
+
+AO0 = addAnalogOutputChannel(s,devID,'ao0','Voltage');
+AO1 = addAnalogOutputChannel(s,devID,'ao1','Voltage');
+
 Ch1 = addAnalogInputChannel(s,devID,'ai1','Voltage');
 Ch1.TerminalConfig = 'SingleEnded';
 Ch2 = addAnalogInputChannel(s,devID,'ai2','Voltage');
 Ch2.TerminalConfig = 'SingleEnded';
-AO0 = addAnalogOutputChannel(s,devID,'ao0','Voltage');
-AO1 = addAnalogOutputChannel(s,devID,'ao1','Voltage');
 
 a = arduino('COM4','Nano3');
 Step = 'A0';
@@ -237,27 +242,27 @@ writeDigitalPin(a,EnablePin,1)
 %% Acquire data with sample in
 %back to position 0
 
-for LoopNum=1:RepeatTests
-    writeDigitalPin(a,EnablePin,0)
-    writeDigitalPin(a,DirPin,1);
-    ButtonStatus = readDigitalPin(a,ButtonPin);
-    while ButtonStatus==1
+for LoopNum=1:RepeatTests %The number of times the "magnetometry" procedure will be repeated. i.e. how many times the sample goes in and out
+    writeDigitalPin(a,EnablePin,0) %Enables the motor
+    writeDigitalPin(a,DirPin,1); %Tells the motor to move out
+    ButtonStatus = readDigitalPin(a,ButtonPin);% Checks if it is already home
+    while ButtonStatus==1 %while it isnt home, keep moving backwards
         ButtonStatus = readDigitalPin(a,ButtonPin);
         writeDigitalPin(a,Step,1);
         writeDigitalPin(a,Step,0);
     end
-    pause(PTime);
+    pause(PTime); %optional pause 
     %move to sample position
-    writeDigitalPin(a,DirPin,0);
-    for j=1:BulbLocation
+    writeDigitalPin(a,DirPin,0);%change direction so it goes it.
+    for j=1:BulbLocation %for the number of steps to takes to get to the right locations
         writeDigitalPin(a,Step,1);
         writeDigitalPin(a,Step,0);
     end
-    writeDigitalPin(a,EnablePin,1)
-    pause(PTime);
-    data = SendData(s,DriveAmp,BiasAmp,fs,MeasureTime, fBias, fDrive);
+    writeDigitalPin(a,EnablePin,1) %Disable motor while sending/Rx data
+    pause(PTime);%optional pause
+    data = SendData(s,DriveAmp,BiasAmp,fs,MeasureTime, fBias, fDrive);%acquire data, with bias field and drive field
     Data_Sample = data;
-    BiasData1 = data(:,2)-mean(data(:,2));
+    BiasData1 = data(:,2)-mean(data(:,2)); %The current sense has a DC offset (it is centered around 2.5V), this takes it off
     
     pause(PTime);
     data = SendData(s,0,BiasAmp,fs,MeasureTime, fBias, fDrive); %Acquire data with the drive coil off to account for bias coil inducing signal
@@ -320,6 +325,12 @@ BiasData_OnePeriod = mean(average_bias,2);
 
 norm_SignalData=(SignalData_OneBiasPeriod-mean(SignalData_OneBiasPeriod))/max(abs(SignalData_OneBiasPeriod-mean(SignalData_OneBiasPeriod)));
 norm_BiasData=(BiasData_OnePeriod-mean(BiasData_OnePeriod))/max(abs(BiasData_OnePeriod-mean(BiasData_OnePeriod)));
+
+removeChannel(s,4); %Removing the biasing channel to limit the number of input signals and maximize sampling rate
+Ch2 = addAnalogInputChannel(s,devID,'ai3','Voltage');% Adding drive current sense
+Ch2.TerminalConfig = 'SingleEnded';
+
+data_Drive_IMon = SendData(s,DriveAmp,0,fs,MeasureTime, fBias, fDrive);%acquire data, with bias field and drive field
 
 %plot normalized averaged data
 figure,plot(tBiasPeriod,norm_SignalData, 'b')

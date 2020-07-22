@@ -1,13 +1,26 @@
 % close all
 clear all
 
+%%
+
+%This script is to operate in "spectroscopy mode" meaning that it will
+%excite the particles at the Tx frequency and a high amplitude (enough to
+%elicit non-linearities) and then evaluate the frequency spectra of these
+%signals. This can be thought of what is happening at the FFL/FFP during
+%imaging (if the FFL/FFP isnt moving quickly)
+
+
+%%
+
+
 d  = daq.getDevices;
 devID = d(1).ID;
 s = daq.createSession('ni');
 % s.Rate=107e3;
-s.Rate=243e3;
+% s.Rate=243e3;
 % s.Rate=246.1e3;
-OnlyRx = 0;
+s.Rate=1e6;
+OnlyRx = 1;
 fs = s.Rate;
 if OnlyRx==1
     s.Rate = 2*s.Rate;
@@ -15,12 +28,12 @@ if OnlyRx==1
 end
 DrivemT = 15;
 % fDrive = 10.7e3;
-fDrive = 24.3e3;
+fDrive = 25e3;
 % fDrive = 40e3;
 
 if fDrive==10.7e3
     mTpermVApex = 0.0288; %10.7 kHz
-elseif fDrive ==24.3e3
+elseif fDrive ==25e3
     mTpermVApex = 0.0416; %24.3 kHz
 elseif fDrive == 40e3
     mTpermVApex = 0.0376; %40.0 kHz
@@ -32,16 +45,17 @@ fBias = 4;
 
 RepeatTests = 5;
 MeasureTime = 4;
-Concentration =0.5;
+
+Concentration =input('Concentration = ');
+
 PTime = 2;
 Ch1 = addAnalogInputChannel(s,devID,'ai1','Voltage');
 Ch1.TerminalConfig = 'SingleEnded';
-if OnlyRx==0
+if OnlyRx==0 %By only measuring only the Rx and not current as well, you can increase the sampling rate
     Ch3 = addAnalogInputChannel(s,devID,'ai3','Voltage');
     Ch3.TerminalConfig = 'SingleEnded';
 end
 AO0 = addAnalogOutputChannel(s,devID,'ao0','Voltage');
-% AO1 = addAnalogOutputChannel(s,devID,'ao1','Voltage');
 
 a = arduino();
 Step = 'A0';
@@ -54,28 +68,8 @@ writeDigitalPin(a,'D3',1) %1 disable, 0 enable
 configurePin(a,'D4','DigitalInput') %button
 ButtonStatus = readDigitalPin(a,'D4');
 IndexMax=231;
-%% adjust gradiometer
-figure(2),clf
-figure(1),clf
-% for K = 1:2
-M=1;
-FMag = zeros(1,M);
-for i = 1:M
-    data = SendData(s,DriveAmp,0,fs,1, fBias, fDrive);
-    [FMag(i),~]=FourierAmplitude(data(:,1),fs,fDrive,1);
-    figure(2),plot(i,FMag(i),'rd','LineWidth',3)
-    rmsvalue(i)=rms((data(:,1)-mean(data(:,1))));
-    figure(1),plot(i,rmsvalue(i),'rd')
-    hold on
-    if i>50
-        xlim([i-50 i])
-    else
-        xlim([0 i])
-    end
-end
-% K
-% Noise = std(F0Mag)/2.23/100*1e9
-% end
+
+
 %% Run N points to position sample
 writeDigitalPin(a,'D3',0)
 writeDigitalPin(a,'D5',1)
@@ -114,6 +108,8 @@ IndexMax=IndexMax+200;
 
 %% Acquire data with sample in
 %back to position 0
+removeChannel(s,3); %Removing the Drive Current signal channel to limit the number of input signals and maximize sampling rate
+
 
 for LoopNum=1:RepeatTests
     writeDigitalPin(a,'D3',0)
@@ -154,7 +150,7 @@ for LoopNum=1:RepeatTests
     
     data = SendData(s,DriveAmp,fs,MeasureTime, fDrive);
     Data_NoSample = data;
-    %BiasData2 = data(:,2)-mean(data(:,2));
+    
     writeDigitalPin(a,'D3',0)
     writeDigitalPin(a,'D5',0)
     for j=1:10
@@ -180,7 +176,7 @@ end
 Data = Data(1:end-4,:);
 
 L = length(Data(:,1));             % Length of signal
-if mod(L,2)~=0
+if mod(L,2)~=0 %If it is an odd number of points
     Data= Data(1:end-1,:);
     L=L-1;
 
@@ -189,7 +185,7 @@ Y_signal = fft(Data(:,1));
 P2 = abs(Y_signal/L); 
 Mag = P2(1:L/2+1); 
 Phase = angle(Y_signal(1:L/2+1));
-Phase(Mag<1e-6)=0;
+Phase(Mag<1e-7)=0; %Getting rid of phase information when it is just noise. Makes the data easier to look at-- this may throw out important information though, so be careful.
 
 f = fs*(0:(L/2))/L; %Freq. vector
 figure(12),semilogy(f,Mag,'k','LineWidth',1.5)

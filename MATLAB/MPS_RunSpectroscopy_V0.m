@@ -17,9 +17,10 @@ d  = daq.getDevices;
 devID = d(1).ID;
 s = daq.createSession('ni');
 % s.Rate=107e3;
-s.Rate=243e3;
+% s.Rate=243e3;
 % s.Rate=246.1e3;
-OnlyRx = 0;
+s.Rate=1e6;
+OnlyRx = 1;
 fs = s.Rate;
 if OnlyRx==1
     s.Rate = 2*s.Rate;
@@ -27,12 +28,12 @@ if OnlyRx==1
 end
 DrivemT = 15;
 % fDrive = 10.7e3;
-fDrive = 24.3e3;
+fDrive = 25e3;
 % fDrive = 40e3;
 
 if fDrive==10.7e3
     mTpermVApex = 0.0288; %10.7 kHz
-elseif fDrive ==24.3e3
+elseif fDrive ==25e3
     mTpermVApex = 0.0416; %24.3 kHz
 elseif fDrive == 40e3
     mTpermVApex = 0.0376; %40.0 kHz
@@ -67,25 +68,7 @@ writeDigitalPin(a,'D3',1) %1 disable, 0 enable
 configurePin(a,'D4','DigitalInput') %button
 ButtonStatus = readDigitalPin(a,'D4');
 IndexMax=231;
-%% adjust gradiometer
-figure(2),clf
-figure(1),clf
 
-M=100;
-FMag = zeros(1,M);
-for i = 1:M
-    data = SendData(s,DriveAmp,0,fs,1, fBias, fDrive);
-    [FMag(i),~]=FourierAmplitude(data(:,1),fs,fDrive,1);
-    figure(2),plot(i,FMag(i),'rd','LineWidth',3)
-    rmsvalue(i)=rms((data(:,1)-mean(data(:,1))));
-    figure(1),plot(i,rmsvalue(i),'rd')
-    hold on
-    if i>50
-        xlim([i-50 i])
-    else
-        xlim([0 i])
-    end
-end
 
 %% Run N points to position sample
 writeDigitalPin(a,'D3',0)

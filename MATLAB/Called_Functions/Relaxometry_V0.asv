@@ -183,8 +183,7 @@ Outputs.LMag_Output = LMag_Output;
 Outputs.MaxSigBias_Bucket = MaxSigBias_Bucket;
 Outputs.MinSigBias_Bucket = MinSigBias_Bucket;
 Outputs.VelCorrectedSig = VelCorrectedSig;
-Outputs.BiasSig  =BiasSig;
-Outputs.Data_Sig = Data_Sig;
+
 
 Colors.VelCorColor = VelCorColor;
 Colors.RawData = RawData;

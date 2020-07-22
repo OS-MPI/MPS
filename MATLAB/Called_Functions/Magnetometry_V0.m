@@ -63,22 +63,26 @@ for K=1:2
 end
 if Normalize==1
     figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i)/max(abs(MagSuscept(1:i))))
+    ylabel('dM/dH (Normalized)')
 else
     figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i))
+    ylabel('dM/dH')
 end
 hold on
 xlabel('External Magnetic Field [T]')
-ylabel('dM/dH')
+
 m(:,1)=flipud(m(:,1));
 m2=mean(m,2);
 Mag = m2/(4*pi*10e-7)/Conc;% Conc is is mg/ml which is also kg/m^3
 if Normalize==1
     figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag/max(abs(Mag)),Line,'LineWidth',1.3)
+    ylabel('Magnetization [a.u.]')
 else
     figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag,Line,'LineWidth',1.3)
+    ylabel('Magnetization [Am^2/kg]')
 end
 xlabel('External Magnetic Field [T]')
-ylabel('Magnetization [Am^2/kg]')
+
 %legend('VivoTrax', 'Ocean NanoTech', 'Location', 'SE')
 hold on
 end
