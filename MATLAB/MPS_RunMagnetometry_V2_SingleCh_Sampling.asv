@@ -19,24 +19,25 @@ s = daq.createSession('ni');
 
 
 
-DrivemT = 16;
+DrivemT = 22; %Not accurate--  needs to be calibrated
 % fDrive = 10.7e3;
 % fDrive = 24.3e3;
 fDrive = 25e3;
 % fDrive = 40e3;
 
 if fDrive==10.7e3
-    mTpermVApex = 0.0288; %10.7 kHz
+    mTpermVDrive = 0.0288; %10.7 kHz
     s.Rate=246.1e3;
-elseif fDrive ==25e3
-    mTpermVApex = 0.0416; %25 kHz Outdated value!!
+elseif fDrive ==24.3e3
+    mTpermVDrive = 0.0416; %25 kHz Outdated value!!
     s.Rate=1e6;
 elseif fDrive == 40e3
-    mTpermVApex = 0.0376; %40.0 kHz
+    mTpermVDrive = 0.0376; %40.0 kHz
     s.Rate=240e3;
 end
 fs = s.Rate;
-DriveAmp = DrivemT/mTpermVApex/1000;
+% DriveAmp = DrivemT/mTpermVDrive/1000;
+DriveAmp = 0.67;
 BiasGain = db2mag(27); %Measured into 8 Ohms resistive load
 BiasImpedance = 6;%Ohms
 TargetBiasCurrent = 7; %Amps
@@ -44,16 +45,18 @@ BiasAmp = TargetBiasCurrent*BiasImpedance/BiasGain;
 fBias = 20;
 
 
-RepeatTests = 2; %Number of times "Magnetometry" will be averaged
+RepeatTests = 1; %Number of times "Magnetometry" will be averaged
 
 
-MeasureTime = 1; %Seconds per acquisition phase
-    Drive.Name = 'Apex PA12A'; %Drive Amplifier name
+MeasureTime = 2; %Seconds per acquisition phase
+
+
+    Drive.Name = 'OPA549'; %Drive Amplifier name
     Drive.Volts = num2str(DriveAmp); 
     Drive.mT = num2str(DrivemT);
     Drive.Freq = num2str(fDrive);
-    Drive.PowerSupplyName= 'BK Precision';
-    Bias.Name = 'Crown XTi2002';
+    Drive.PowerSupplyName= 'ExTech Instruments 382275 SMPS';
+    Bias.Name = 'RCF IPS700';
     Bias.Volts = num2str(BiasAmp);
     Bias.mT = num2str(0);
     Bias.Freq = num2str(fBias);
@@ -97,7 +100,7 @@ PointsToCrop = BiasPeriods_Crop*PointsPerBiasPeriod;
 
 
 VoltsPerAmp = 0.04;
-TeslaPerAmp = .006;
+TeslaPerAmp_Bias = .006;
 
 
 %% Run N points to position sample
@@ -300,12 +303,11 @@ Data.BiasIMon_Raw  = data_Bias_IMon;
 
 
 % %% Relaxometry Analysis
+IMon
 
-
-PointsPerBiasPeriod = fs/fBias;
 PointsPerDrivePeriod = fs/fDrive;
 Bias_IMon_InPhase_OnePeriod= Bias_IMon_InPhase_OnePeriod-mean(Bias_IMon_InPhase_OnePeriod);
-BiasField = Bias_IMon_InPhase_OnePeriod*TeslaPerAmp/VoltsPerAmp;
+BiasField = Bias_IMon_InPhase_OnePeriod*TeslaPerAmp_Bias/VoltsPerAmp;
 DriveField = smooth(Drive_IMon_InPhase_OnePeriod*10*2e-3,fs/fDrive/10);
 BiasField = BiasField(:);
 % BiasField = circshift(BiasField,00);
@@ -315,6 +317,7 @@ Startpoint=min([find(TotalField==max(TotalField)) find(TotalField==min(TotalFiel
 SignalData_OneBiasPeriod = [SignalData_OneBiasPeriod(:);SignalData_OneBiasPeriod(:)];
 TotalField = [TotalField(:);TotalField(:)];
 [RelaxOutputs,RelaxColors] = Relaxometry_V0(SignalData_OneBiasPeriod(Startpoint:Startpoint+PointsPerBiasPeriod/2),TotalField(Startpoint:Startpoint+PointsPerBiasPeriod/2),fDrive,fs,1,1,1,.06);
+
 %% Plotting and Exporting
 
 ResultsFig = figure('Position',[100,100,1200,800]);
@@ -326,19 +329,20 @@ plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.MaxSig_Bucket/max(RelaxOutputs.
 hold on
 plot(RelaxOutputs.MinSigBias_Bucket,abs(RelaxOutputs.MinSig_Bucket/max(abs(RelaxOutputs.MinSig_Bucket))),'Color',RelaxColors.LProfileColor,'LineWidth',2)
 plot(Data.BiasFieldVector,Data.Susceptibility/max(Data.Susceptibility),'LineWidth',2,'Color',RelaxColors.RawData)
+legend('Right scanning','Left scannning','Magnetometry')
 
 dM_dH_Axes = axes('Position',[.55,.55,.4,.4]);
 plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.RMag_Output,'Color',RelaxColors.RProfileColor,'LineWidth',2)
 hold on
 plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.LMag_Output,'Color',RelaxColors.LProfileColor,'LineWidth',2)
 plot(Data.BiasFieldVector(2:end),Data.Magnetization/max(abs(Data.Magnetization)),'LineWidth',2,'Color',RelaxColors.RawData)
-
+legend('Right scanning','Left scannning','Magnetometry')
 SinglePeriod_Axes = axes('Position',[.05,.05,.4,.4]);
 plot(DataMat(:,1),'LineWidth',2,'Color',RelaxColors.RawData)
 hold on
 plot(DataMat(:,2)-mean(DataMat(:,2)),'r','LineWidth',2)
-legend('
-ExportData_V0(Name,Concentration,Particles,RepeatTests,'Magnetometry',MeasureTime,fs,Drive,Bias,Data,0,0,0)
+legend('Rx Signal','Bias Amplitude')
+ExportData_V0(Name,Concentration,Particles,RepeatTests,'Magnetometry',MeasureTime,fs,Drive,Bias,Data,RelaxOutputs,RelaxColors,0,0,0,ResultsFig)
 
 
 %%

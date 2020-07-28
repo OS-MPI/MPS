@@ -28,7 +28,7 @@ fDrive = 25e3;
 if fDrive==10.7e3
     mTpermVDrive = 0.0288; %10.7 kHz
     s.Rate=246.1e3;
-elseif fDrive ==25e3
+elseif fDrive ==24.3e3
     mTpermVDrive = 0.0416; %25 kHz Outdated value!!
     s.Rate=1e6;
 elseif fDrive == 40e3
@@ -36,7 +36,8 @@ elseif fDrive == 40e3
     s.Rate=240e3;
 end
 fs = s.Rate;
-DriveAmp = DrivemT/mTpermVDrive/1000;
+% DriveAmp = DrivemT/mTpermVDrive/1000;
+DriveAmp = 0.67;
 BiasGain = db2mag(27); %Measured into 8 Ohms resistive load
 BiasImpedance = 6;%Ohms
 TargetBiasCurrent = 7; %Amps
@@ -44,10 +45,12 @@ BiasAmp = TargetBiasCurrent*BiasImpedance/BiasGain;
 fBias = 20;
 
 
-RepeatTests = 10; %Number of times "Magnetometry" will be averaged
+RepeatTests = 1; %Number of times "Magnetometry" will be averaged
 
 
-MeasureTime = 1; %Seconds per acquisition phase
+MeasureTime = 2; %Seconds per acquisition phase
+
+
     Drive.Name = 'OPA549'; %Drive Amplifier name
     Drive.Volts = num2str(DriveAmp); 
     Drive.mT = num2str(DrivemT);
@@ -97,7 +100,7 @@ PointsToCrop = BiasPeriods_Crop*PointsPerBiasPeriod;
 
 
 VoltsPerAmp = 0.04;
-TeslaPerAmp = .006;
+TeslaPerAmp_Bias = .006;
 
 
 %% Run N points to position sample
@@ -300,13 +303,13 @@ Data.BiasIMon_Raw  = data_Bias_IMon;
 
 
 % %% Relaxometry Analysis
+CurrentSenseResist_Drive = 0.1; %Ohms
+TeslaPerAmp_Drive = 2e-3; %Tesla
 
-
-PointsPerBiasPeriod = fs/fBias;
 PointsPerDrivePeriod = fs/fDrive;
 Bias_IMon_InPhase_OnePeriod= Bias_IMon_InPhase_OnePeriod-mean(Bias_IMon_InPhase_OnePeriod);
-BiasField = Bias_IMon_InPhase_OnePeriod*TeslaPerAmp/VoltsPerAmp;
-DriveField = smooth(Drive_IMon_InPhase_OnePeriod*10*2e-3,fs/fDrive/10);
+BiasField = Bias_IMon_InPhase_OnePeriod*TeslaPerAmp_Bias/VoltsPerAmp;
+DriveField = smooth(Drive_IMon_InPhase_OnePeriod*1/CurrentSenseResist_Drive*TeslaPerAmp_Drive,PointsPerDrivePeriod/10);
 BiasField = BiasField(:);
 % BiasField = circshift(BiasField,00);
 DriveField = DriveField(:);
