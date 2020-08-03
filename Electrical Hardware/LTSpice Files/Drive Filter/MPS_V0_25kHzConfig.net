@@ -1,0 +1,12 @@
+* C:\Users\e22ma\Dropbox\MPI Group Folder\MPS\Spice_Sims\MPS_V0_25kHzConfig.asc
+Vsource1 Vsource1 0 SINE(0 60 25k 0 0 0) AC 1 Rser=0
+L1 V1 V2 16.38µ Rser=0.075
+C2 V2 0 5µ
+L2 V2 V3 155.9µ Rser=0.26
+C3 V3 0 .94µ
+Ldrive V3 N001 61.6µ
+Rdrive N001 0 325m
+C1 V1 Vsource1 5µ
+.ac dec 1000 1k 500k
+.backanno
+.end
