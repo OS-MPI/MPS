@@ -1,6 +1,6 @@
 %% Assume optimum noise is when thermal noise = pre-amp noise
 function [IdealTurns,IdealR] = Preamp_Coil_NoiseMatching(PreampNoise,WireDia)
-% Enter preamp noise in nanovolts
+% Enter preamp noise in nV/sqrt(Hz)
 % Enter wire diameter in mm
 
 
@@ -16,17 +16,21 @@ WireArea = (pi/4*WireDia^2);%meters^2
 JohnsonNoise = @(N)0.13*sqrt(pi*CoilMeanDia*N*Resistivity/WireArea);%nV/sqrt(Hz) at room temp. This approximation is from Wikipedia
 
 
-Turns = @(N) PreampNoise-JohnsonNoise(N); %Function to solve for ideal turns
-Resist = @(R) PreampNoise-0.13*sqrt(R); %Function to solve for ideal resistance to match noise generation
 
-% Syntax for following functions is: mybisect(Function, Left start point,
-% Right start point, bisection iterations performed)
+%% If current noise is not included
+% Turns = @(Noise) (Noise/0.13).^2*WireArea/(pi*CoilMeanDia*Resistivity); %Function to solve for ideal turns as a function of preamp noise
+% Resist = @(Noise) (Noise/0.13).^2; %Function to solve for ideal resistance to match noise generation
 
-IdealTurns = mybisect(Turns,0,100000,50); 
-IdealR = mybisect(Resist,0,10000,50);
+% IdealTurns = Turns(PreampNoise); 
+% IdealR = Resist(PreampNoise);
+
 %% If current noise is included
-in = 1e-3; %nv/sqrt(Hz) taken from a datasheet
-CurrentNoise = @(R) in*R;
-TotalNoise = @(R) Resist(R)+CurrentNoise(R);
-IdealR_Plus_Current = mybisect(TotalNoise,0,10000,50);
+Quadratic = @(A,B,C) [(-B+sqrt(B^2-4*A*C))/(2*A),(-B-sqrt(B^2-4*A*C))/(2*A)];
 
+
+in = 1e-3; %nv/sqrt(Hz) taken from a datasheet
+IdealR = (real(Quadratic(in^2,0.13^2,-PreampNoise^2)));
+IdealR = IdealR(IdealR>0);
+
+IdealTurns = (real(Quadratic((in*pi*CoilMeanDia*Resistivity/WireArea)^2,0.13^2*pi*CoilMeanDia*Resistivity/WireArea,-PreampNoise^2)));
+IdealTurns = IdealTurns(IdealTurns>0);

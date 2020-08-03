@@ -281,6 +281,7 @@ data_Bias_IMon_Smooth= smooth(data_Bias_IMon,2000);
     Bias_IMon_InPhase_RS_TMP = reshape(data_Bias_IMon_Smooth(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
     
     Bias_IMon_InPhase_OnePeriod = mean(Bias_IMon_InPhase_RS_TMP,1);
+    
 clear BiasSmoothTmp data_Drive_IMon_SmoothTmp Bias_IMon_InPhase_RS_TMP
 
 data_Drive_IMon_SmoothTmp = smooth(data_Drive_IMon,5);
@@ -292,6 +293,7 @@ Drive_IMon_InPhase = DriveSmoothTmp/max(DriveSmoothTmp)*max(data_Drive_IMon_Smoo
     Drive_IMon_InPhase_RS_TMP = reshape(Drive_IMon_InPhase(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
     
     Drive_IMon_InPhase_OnePeriod = mean(Drive_IMon_InPhase_RS_TMP,1);
+    Data.Drive_IMon_InPhase_OnePeriod = Drive_IMon_InPhase_OnePeriod;
 clear BiasSmoothTmp data_Drive_IMon_SmoothTmp Drive_IMon_InPhase_RS_TMP
 Bias_IMon_InPhase_OnePeriod = circshift(Bias_IMon_InPhase_OnePeriod,1100);
 DataMat = [SignalData_OneBiasPeriod(:),Bias_IMon_InPhase_OnePeriod(:)];

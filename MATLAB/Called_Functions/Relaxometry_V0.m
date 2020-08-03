@@ -26,7 +26,7 @@ LProfileColor= [.8 .3 .3];
 RProfileColor= [.8 .8 .1];
 
 %%
-
+Data_Sig = Data_Sig/Conc;
 
 L = length(Data_Sig);   % Length of signal
 t = linspace(0,L/fs,L); %Time Vector

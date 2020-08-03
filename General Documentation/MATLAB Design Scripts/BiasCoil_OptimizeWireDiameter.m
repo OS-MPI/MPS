@@ -5,7 +5,7 @@ set(0,'DefaultFigureWindowStyle','docked');
 
 
 % WireDList = .0001:.0001:.01; %The list of wire diameters to test
-WireDList= .00083;
+WireDList= .00083; %Meters
 CoilCost = zeros(1,length(WireDList));
 
 for j = 1:length(WireDList)
@@ -13,7 +13,7 @@ for j = 1:length(WireDList)
     TubeDiam = .054; %Sets the ID of the bias coil
     TubeCircum = pi*TubeDiam;%meters
     
-    ResistanceGoal = 3.6;%Ohms
+    ResistanceGoal = 4.7;%Ohms
     CuResistivity = 1.7e-8; %ohm*m
     
     ILim = 5; %The maximum current the amplifier allows
@@ -26,7 +26,7 @@ for j = 1:length(WireDList)
     Turns = Wire_L/TubeCircum;
     Layers = ceil(Turns/TurnsPerLayer);
     
-    LayerGap = .003*2;
+    LayerGap = .004*2;
     
     CuDensity = 9e3; %kg/m^3
     CuCostPerkg = 30;%USD
