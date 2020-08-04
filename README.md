@@ -1,7 +1,8 @@
-# The Magnetic Particle Spectroscopy (MPS) device
+=# The Magnetic Particle Spectroscopy (MPS) device
 # [Link to the wiki](https://github.com/OS-MPI/MPS/wiki)
+# [Link to the Main OS-MPI Page](https://os-mpi.github.io/)
 
-<img src="Data_And_Figures/MPS_System_Photo_1.jpg">
+<img src="Data_And_Figures/MPS_System_Photo_2.jpg">
 
 ## Motivation and Introduction
 
@@ -9,6 +10,13 @@ The system we are calling the MPS device is a low cost, simple to manufacture pr
 
 ## State of the project
 
-As with all other systems hosted on this GitHub page, the MPS system is still being actively developed. In the current state (of Feb. 17, 2020) we have the system working in "magnetometry mode" and "spectroscopy mode" well using the Apex PA12A and INA217 for drive and preamplifiers respectivly. Though we are currently using larger commercial bias amplifier primarily for development purposes (they are higher power and lower noise) though the TDA7391 and TDA7294V both are working. The main upcoming goals will be to refine the software. Namely the relaxometry analysis needs further work, and cleaning/commenting code is in progress. We are also working on the next preamplifer circuit, but the existing one's PCB files (plus the other amplifier's circuitboards) will be uploaded.
+As with all other systems hosted on this GitHub page, the MPS system is still being actively developed. In the current state (of Aug, 2020) we have the system working in all [three primary operational modes](https://github.com/OS-MPI/MPS/wiki/Modes-of-operation). The hardware is being continually improved, recently focusing on the system amplifiers. The drive amplifier is now based around the OPA549, which has proved more robust than the previous designs, and should be able to be parallelized for increased power.
+
+
+The main upcoming goals will be to refine the software. Namely, improving the flexibility and efficiency of the code, in addition to that, we are standardizing a data format with accompanying documentation such that other groups will be able to read files produced by our (or similar) systems. That brings up the next major room for improvement, which is the documentation. Going forward we plan to continually add to the documentation such as adding operational and construction instructions.
+
+With any issues regarding the project or missing files/documentation, [please reach out to the authors of this project here](https://github.com/OS-MPI/MPS/wiki/Contact-Us). 
+
+
 
 

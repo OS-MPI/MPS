@@ -1,8 +1,8 @@
-Circuit: * C:\Users\e22ma\Dropbox\MPI Group Folder\MPS\Spice_Sims\MPS_V0_10kHzConfig.asc
+Circuit: * C:\Users\e22ma\OneDrive - Massachusetts Institute of Technology\Documents\GitHub\MPS\Electrical Hardware\LTSpice Files\Drive Filter\MPS_V0_10kHzConfig.asc
 
 
-Date: Wed Jul 29 13:03:05 2020
-Total elapsed time: 0.149 seconds.
+Date: Mon Aug 03 18:38:05 2020
+Total elapsed time: 0.070 seconds.
 
 tnom = 27
 temp = 27

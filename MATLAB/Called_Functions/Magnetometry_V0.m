@@ -1,4 +1,9 @@
 function [BiasField,MagSuscept,Mag] = Magnetometry_V0(Data,startpoint,endpoint,smoothPts,Fb,Conc,Fs,Fd, Line,DrivemT,Normalize)
+
+
+% Update to take in variables describing system 
+% Also implement s = spectrogram(x) to make code more efficient. 
+
 Gain = 100; %Preamp gain
 Turns_Rx = 450; %turns on half of gradiometer
 Wire_D_Rx = 0.15e-3;%m

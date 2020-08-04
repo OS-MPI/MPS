@@ -1,9 +1,9 @@
-* C:\Users\e22ma\OneDrive - Massachusetts Institute of Technology\Documents\GitHub\MPS\Electrical Hardware\LTSpice Files\Drive Filter\MPS_V0_25kHzConfig.asc
+* C:\Users\e22ma\OneDrive - Massachusetts Institute of Technology\Documents\GitHub\MPS\Electrical Hardware\LTSpice Files\Drive Filter\MPS_V0_10kHzConfig.asc
 Vsource1 Vsource1 0 SINE(0 60 25k 0 0 0) AC 1 Rser=0
 L1 V1 V2 16.38µ Rser=0.075
-C2 V2 0 5µ
+C2 V2 0 11µ
 L2 V2 V3 155.9µ Rser=0.26
-C3 V3 0 .94µ
+C3 V3 0 5µ
 Ldrive V3 N001 61.6µ
 Rdrive N001 0 325m
 C1 V1 Vsource1 5µ
