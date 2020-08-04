@@ -1,4 +1,4 @@
-=# The Magnetic Particle Spectroscopy (MPS) device
+# The Magnetic Particle Spectroscopy (MPS) device
 # [Link to the wiki](https://github.com/OS-MPI/MPS/wiki)
 # [Link to the Main OS-MPI Page](https://os-mpi.github.io/)
 
