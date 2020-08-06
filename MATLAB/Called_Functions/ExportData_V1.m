@@ -47,7 +47,7 @@ i = 0;
 Name_New = Name_Orig;
 if exist([Name_Orig])==7
     while exist([Name_New])==7
-        Name_New = strcat(Name_Orig,num2str(i));
+        Name_New = strcat(Name_Orig,'_',num2str(i));
         i = i+1;
     end
 end
@@ -58,7 +58,7 @@ writetable(BasicData,[Name_New,'/',Name,'.txt'])
 %% Magnetometry
 MagFig = figure('Units','Inches','Position',[1 1 7.5 5]);
 subplot(2,1,1)
-plot(Results.Magnetometry.Output.BiasFieldPlotResults.Magnetometry.Output.Susceptibility)
+plot(Results.Magnetometry.Output.BiasFieldPlot,Results.Magnetometry.Output.Susceptibility)
 xlabel('External Magnetic Field [mT]')
 ylabel('dM/dH')
 title({SPION_Info.Name;date})
@@ -154,30 +154,35 @@ save([Name_New,'/',Name],Name)
 
 
 %% Compiling all the information into a LaTeX doxument
-OpeningText = '\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\title{ADD TITLE}\n\\date{\\today}\n\\begin{document}\n';
+OpeningText = '\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage{graphicx}\n\\title{ADD TITLE}\n\\date{\\today}\n\\begin{document}\n';
 EndText = '\n\\end{document}';
-
-TextStr = '\\section{Acquisition Parameters}\n';
+TextStr = '\\section{Acquisition Parameters}\n\\begin{itemize}';
 for i = 1:height(BasicData)
     
-    TextStr = [TextStr,'\\textbf(',BasicData.Params{i},'):',BasicData.Vals{i} ,'\n'];
+    TextStr = [TextStr,'\t\\item{\\textbf{',BasicData.Params{i},'}:',BasicData.Vals{i} ,'}\n'];
     
 end
-
-TextStr = [TextStr,'\n\\section{Magnetometry}\n'];
+TextStr = [TextStr,'\\end{itemize}\n'];
+TextStr = [TextStr,'\n\\section{Magnetometry}\n\n\\begin{itemize}'];
 for i = 1:height(MagParamsData)
     
-    TextStr = [TextStr,'\\textbf(',MagParamsData.MagParams{i},'):',MagParamsData.MagVals{i} ,'\n'];
+    TextStr = [TextStr,'\\textbf{',MagParamsData.MagParams{i},'}:',MagParamsData.MagVals{i} ,'\n'];
     
 end
+TextStr = [TextStr,'\\end{itemize}\n'];    
+MagnetometryCaption = 'TestCaption for Mag';
 [TextStr] = FigText(TextStr,MagnetometryPath,MagnetometryCaption);
 
-TextStr = [TextStr,'\n\\section{Relaxometry}\n'];
+TextStr = [TextStr,'\n\\section{Relaxometry}\n\\begin{itemize}'];
 [TextStr] = FigText(TextStr,RelaxometryPath,RelaxometryCaption);
 
-TextStr = [TextStr,'\n\\section{Spectroscopy}\n'];
+
+TextStr = [TextStr,'\\end{itemize}\n'];
+
+TextStr = [TextStr,'\n\\section{Spectroscopy}\n\\begin{itemize}'];
 [TextStr] = FigText(TextStr,SpectroscopyPath,SpectroscopyCaption);
 
+TextStr = [TextStr,'\\end{itemize}\n'];
 
 FileID = fopen(ExportFileName,'w');
 fprintf(FileID,[OpeningText TextStr EndText]);

@@ -1,10 +1,10 @@
-function [Outputs,Colors] = Relaxometry_V0(Data_Sig,BiasSig,Fd,fs,InterpTF,InterpFactor,Conc,PlotLims)
+function [Outputs,Colors] = Relaxometry_V0(Data_Sig,ExternalField,Fd,fs,InterpTF,InterpFactor,Conc,PlotLims)
 
 %% Description
 
 % This function takes in the following:
 %   Data_Sig is the signal due to particles
-%   BiasSig is the sum of any external field signal, so it could be a
+%   ExternalField is the sum of any external field signal, so it could be a
 %   current sense of drive and bias, or a sense coil inside the bore.
 %   Fd: Drive frequency
 %   fs: Sampling freq.
@@ -37,7 +37,7 @@ if InterpTF == 1
     tt = linspace(t(1),t(end),length(t)*InterpFactor);
     Data_Sig = interp1(t,Data_Sig,tt,'spline');
     
-    BiasSig = interp1(t,BiasSig,tt);
+    ExternalField = interp1(t,ExternalField,tt);
     
     t = tt';
     L = length(Data_Sig);
@@ -49,8 +49,8 @@ end
 if size(t,1)<size(t,2) %Making sure it is a column
     t=t';
 end
-if size(BiasSig,1)<size(BiasSig,2)%Making sure it is a column
-    BiasSig=BiasSig';
+if size(ExternalField,1)<size(ExternalField,2)%Making sure it is a column
+    ExternalField=ExternalField';
 end
 %% Plotting initial data
 PlotInitial = 1;
@@ -58,7 +58,7 @@ if PlotInitial==1
     figure,subplot(2,1,1),plot(t,Data_Sig/max(abs(Data_Sig)),'Color',RawData)
     ylabel('Normalized Rx Signal')
     title('Input Data')
-    subplot(2,1,2),plot(t,BiasSig/max(abs(BiasSig)),'Color',RawData)
+    subplot(2,1,2),plot(t,ExternalField/max(abs(ExternalField)),'Color',RawData)
     ylabel('Normalized Excitation Field')
     xlabel('Time (seconds)')
 
@@ -71,13 +71,13 @@ PointsPerPeriod = fs/Fd;
 if mod(L,2)~=0 %If there is an odd num of samples make it even
     Data_Sig = Data_Sig(1:end-1);
     t= t(1:end-1);
-    BiasSig = BiasSig(1:end-1);
+    ExternalField = ExternalField(1:end-1);
     
     L=L-1;
 end
 
 dt = t(2)-t(1);
-Velocity = diff(BiasSig);
+Velocity = diff(ExternalField);
 VelocityTimes = t+dt/2;
 Velocity = interp1(VelocityTimes(1:end-1),Velocity,t,'spline');
 SmoothPoints = fs/Fd/10;
@@ -99,8 +99,8 @@ if PlotVelCor==1
     xlabel('Time (Seconds)')
     legend('Original Data','Vel. Corrected')
     title('Input Data')
-    subplot(2,1,2),plot(BiasSig,Data_Sig/max(abs(Data_Sig)),'Color',RawData)
-    hold on,subplot(2,1,2),plot(BiasSig(HighVelocity),VelCorrectedSig/max(abs(VelCorrectedSig)),'Color',VelCorColor)
+    subplot(2,1,2),plot(ExternalField,Data_Sig/max(abs(Data_Sig)),'Color',RawData)
+    hold on,subplot(2,1,2),plot(ExternalField(HighVelocity),VelCorrectedSig/max(abs(VelCorrectedSig)),'Color',VelCorColor)
     ylabel('Normalized Rx Signal')
     xlabel('External Field(T/\mu_0)')
     legend('Original Data','Vel. Corrected')
@@ -110,7 +110,7 @@ end
 
 
 %%
-BiasSig = BiasSig(HighVelocity);
+ExternalField = ExternalField(HighVelocity);
 
 NumBuckets = floor(length(VelCorrectedSig)/(PeriodsPerBucket*PointsPerPeriod));
 
@@ -118,11 +118,11 @@ NumBuckets = floor(length(VelCorrectedSig)/(PeriodsPerBucket*PointsPerPeriod));
 if mod(length(VelCorrectedSig),PeriodsPerBucket*PointsPerPeriod)~=0
     VelCorrectedSig= VelCorrectedSig(1:length(VelCorrectedSig)-mod(length(VelCorrectedSig),PeriodsPerBucket*PointsPerPeriod));
     
-    BiasSig = BiasSig(1:length(VelCorrectedSig)-mod(length(VelCorrectedSig),PeriodsPerBucket*PointsPerPeriod));
+    ExternalField = ExternalField(1:length(VelCorrectedSig)-mod(length(VelCorrectedSig),PeriodsPerBucket*PointsPerPeriod));
     Data_Sig =  Data_Sig(1:length(VelCorrectedSig)-mod(length(VelCorrectedSig),PeriodsPerBucket*PointsPerPeriod));
 end
 
-AllDataMat = sortrows([BiasSig,VelCorrectedSig]);
+AllDataMat = sortrows([ExternalField,VelCorrectedSig]);
 SigDataReshape = reshape(AllDataMat(:,2),(PointsPerPeriod*PeriodsPerBucket),NumBuckets);
 BucketedBias = reshape(AllDataMat(:,1),(PointsPerPeriod*PeriodsPerBucket),NumBuckets);
 MaxSig_Bucket = max(SigDataReshape);
@@ -146,7 +146,7 @@ maxMag = max(Magnetization_R-mean([Magnetization_R(1),Magnetization_R(end)]));
 %% Plot Final
 PlotFinal = 1;
 if PlotFinal==1
-    figure,  subplot(3,1,1),plot(BiasSig,VelCorrectedSig/max(abs(VelCorrectedSig)),'Color',VelCorColor)
+    figure,  subplot(3,1,1),plot(ExternalField,VelCorrectedSig/max(abs(VelCorrectedSig)),'Color',VelCorColor)
     hold on,plot(MaxSigBias_Bucket,MaxSig_Bucket/max(MaxSig_Bucket),'Color',RProfileColor,'LineWidth',2)
     plot(MinSigBias_Bucket,MinSig_Bucket/max(abs(MinSig_Bucket)),'Color',LProfileColor,'LineWidth',2)
     ylabel('Normalized Rx Signal')
@@ -183,7 +183,7 @@ Outputs.LMag_Output = LMag_Output;
 Outputs.MaxSigBias_Bucket = MaxSigBias_Bucket;
 Outputs.MinSigBias_Bucket = MinSigBias_Bucket;
 Outputs.VelCorrectedSig = VelCorrectedSig;
-Outputs.BiasSig  =BiasSig;
+Outputs.BiasSig  =ExternalField;
 Outputs.Data_Sig = Data_Sig;
 
 Colors.VelCorColor = VelCorColor;

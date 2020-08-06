@@ -15,7 +15,7 @@ clear all
 addpath([pwd '\Called_Functions'])
 
 
-TESTMODE = 0; %Set this to 1 to prevent the motor homing loop (If the motor isn't plugged it, it makes it a pain to debug without this)
+TESTMODE = 1; %Set this to 1 to prevent the motor homing loop (If the motor isn't plugged it, it makes it a pain to debug without this)
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -41,7 +41,7 @@ UserData.Location = 'Martinos Center, Boston, MA, USA';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Magnetometry %%%%%%%
-fs = 500e3;
+fs = 125e3;
 Results.Magnetometry.Parameters.fs = fs;
 fDrive = 25e3;
 Results.Magnetometry.Parameters.fDrive = fDrive;
@@ -143,7 +143,7 @@ Results.Spectroscopy.Parameters.fs = fs;
 disp('NIDAQ Configured')
 
 
-a = arduino('COM4','Nano3'); %Modify this line to suit your board/port
+a = arduino('COM3','Uno'); %Modify this line to suit your board/port
 Step = 'A0';
 DirPin = 'D5';
 EnablePin = 'D3';
@@ -514,14 +514,14 @@ Results.Relaxometry.ProcessedData.BiasField = Results.Relaxometry.ProcessedData.
 %%
 
 %plot normalized averaged data
-% figure,plot(tBiasPeriod,norm_SignalData, 'b')
-% hold on
-% plot(tBiasPeriod,MagNorm_BiasData, 'r')
-% title(SPION_Info.Name)
-% xlabel('Time [s]')
-% legend('measured Rx voltage (normalized and background subtracted)','measured Bias current (Hall, normalized)','Location','northwest')
-% ylim([-1 1])
-% disp('Data Acquisition Done')
+figure,plot(tBiasPeriod,norm_SignalData, 'b')
+hold on
+plot(tBiasPeriod,MagNorm_BiasData, 'r')
+title(SPION_Info.Name)
+xlabel('Time [s]')
+legend('measured Rx voltage (normalized and background subtracted)','measured Bias current (Hall, normalized)','Location','northwest')
+ylim([-1 1])
+disp('Data Acquisition Done')
 
 
 [MagOutputs,MagParams]=Magnetometry_V1(SPION_Info,Results.Magnetometry.Parameters,Results.Magnetometry.RawData.RawSignal(:),Results.Magnetometry.ProcessedData.BiasField(:),50,'-');
@@ -552,8 +552,8 @@ Results.Relaxometry.Output.LMag_Output = RelaxOutputs.LMag_Output;
 Results.Relaxometry.Output.MaxSigBias_Bucket = RelaxOutputs.MaxSigBias_Bucket;
 Results.Relaxometry.Output.MinSigBias_Bucket = RelaxOutputs.MinSigBias_Bucket;
 Results.Relaxometry.Output.VelCorrectedSig = RelaxOutputs.VelCorrectedSig;
-Results.Relaxometry.Output.ExternalField  = RelaxOutputs.ExternalField;
-
+Results.Relaxometry.Output.BiasSig  = RelaxOutputs.BiasSig;
+Results.Relaxometry.Output.Data_Sig = RelaxOutputs.Data_Sig;
 
 %% Spectroscopy Analysis 
 
@@ -561,15 +561,7 @@ Results.Spectroscopy.ProcessedData.SpecDataFFT = fft(SpecSubtractedData);
 Results.Spectroscopy.ProcessedData.SpecDataL = length(SpecSubtractedData);
 L = Results.Spectroscopy.ProcessedData.SpecDataL;
 FFTMag2S = abs(Results.Spectroscopy.ProcessedData.SpecDataFFT/L);
-Results.Spectroscopy.ProcessedData.FFTMag1S = FFTMag2S(1:round(L/2))*2;
-Results.Spectroscopy.ProcessedData.FFTMag1S = Results.Spectroscopy.ProcessedData.FFTMag1S(:); %making into a column
-
-Results.Spectroscopy.ProcessedData.FFTPhase = angle(Results.Spectroscopy.ProcessedData.SpecDataFFT(:));
-Results.Spectroscopy.ProcessedData.FFTPhase = Results.Spectroscopy.ProcessedData.FFTPhase(1:round(L/2));
-
-Results.Spectroscopy.ProcessedData.fVector = fsInterp*(0:(L/2))/L;
-Results.Spectroscopy.ProcessedData.fVector =Results.Spectroscopy.ProcessedData.fVector(:); %making into a column
-fVec = Results.Spectroscopy.ProcessedData.fVector;
+FFTMag1S = FFTMag2S(1:
 
 clear FFTMag2S
 
