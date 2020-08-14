@@ -12,7 +12,7 @@ if nargin<5
 else
     figure(Fig)
 end
-%%%%%%%%%%%%%%%%%%%%%% MAGNETOMETRY %%%%%%%%%%%%%
+
 TmpAx = subplot(2,3,1);
  hold on
 plot(Results.Magnetometry.Output.BiasFieldPlot,Results.Magnetometry.Output.Susceptibility,'Color',Color,'LineWidth',2,'LineStyle','-');
@@ -34,8 +34,7 @@ subplot(2,3,2), hold on
 plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.MaxSig_Bucket/max(Results.Relaxometry.Output.MaxSig_Bucket),'Color',Color,'LineWidth',2,'LineStyle','--')
 hold on
 plot(Results.Relaxometry.Output.MinSigBias_Bucket,abs(Results.Relaxometry.Output.MinSig_Bucket/max(abs(Results.Relaxometry.Output.MinSig_Bucket))),'Color',Color,'LineWidth',2,'LineStyle','-')
-xlabel('External Magnetic Field [mT]')
-ylabel('Normalized dM/dH (A.U)')
+
 legend('Right scanning','Left scannning')
 
 subplot(2,3,5), hold on
@@ -46,7 +45,6 @@ legend('Right scanning','Left scannning')
 xlabel('External Magnetic Field [mT]')
 ylabel('Normalized Magnetization (A.U)')
 
- %%%%%%%%%%%%%%%% SPECTROSCOPY %%%%%%%%%%%%%%%%%%%
 
 subplot(2,3,6)
 semilogy(Results.Spectroscopy.ProcessedData.fVector,Results.Spectroscopy.ProcessedData.FFTMag1S,'Color','k','LineWidth',.5)
@@ -59,8 +57,8 @@ semilogy(Results.Spectroscopy.ProcessedData.fVector(PlotIndex(1:2:end)), Results
 semilogy(Results.Spectroscopy.ProcessedData.fVector(PlotIndex(2:2:end)), Results.Spectroscopy.ProcessedData.FFTMag1S(PlotIndex(2:2:end)),'Color',Color,'LineStyle','none','Marker','o')
 
 % semilogy(f(mod(f,fDrive*2)==0 & f~= 0), FTMagnitude(mod(f,fDrive*2)==0 & f~= 0),'ro','LineWidth',2) %Mark even harmonics
-xlabel('Frequency (Hz)')
-ylabel('Spectral Amplitude (A.U)')
+xlabel('Frequency')
+ylabel('Spectral Amplitude')
 sgtitle({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
 
 
