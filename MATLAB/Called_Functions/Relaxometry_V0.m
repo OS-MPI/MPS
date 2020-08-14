@@ -82,13 +82,17 @@ VelocityTimes = t+dt/2;
 Velocity = interp1(VelocityTimes(1:end-1),Velocity,t,'spline');
 SmoothPoints = fs/Fd/10;
 Velocity = smooth(Velocity,SmoothPoints);
+% HighVelocity = find(abs(Velocity)>max(abs(Velocity))/2 | (abs(ExternalField)<15 &abs(Velocity)>max(abs(Velocity))/10)); %preventing division by zero by only picking data with high velocity
+% HighVelocity = find(abs(Velocity)>max(abs(Velocity))/2 ); %preventing division by zero by only picking data with high velocity
+
+% HighVelocity = find((abs(ExternalField)<15 &abs(Velocity)>max(abs(Velocity))/10)); %preventing division by zero by only picking data with high velocity
+%%
+% HighVelocity = ( (abs(Velocity)/max(abs(Velocity))-.1)>abs(ExternalField/max(ExternalField))/2);
 HighVelocity = find(abs(Velocity)>max(abs(Velocity))/2); %preventing division by zero by only picking data with high velocity
-
-
 
 VelCorrectedSig = Data_Sig(HighVelocity)./abs(Velocity(HighVelocity)); %Velocity correcting by dividing by the external field rate of change (velocity)
 t_VelCor = t(HighVelocity);
-%% Plotting Velocity Correction
+%%% Plotting Velocity Correction
 
 
 PlotVelCor = 1;
@@ -102,7 +106,7 @@ if PlotVelCor==1
     subplot(2,1,2),plot(ExternalField,Data_Sig/max(abs(Data_Sig)),'Color',RawData)
     hold on,subplot(2,1,2),plot(ExternalField(HighVelocity),VelCorrectedSig/max(abs(VelCorrectedSig)),'Color',VelCorColor)
     ylabel('Normalized Rx Signal')
-    xlabel('External Field(T/\mu_0)')
+    xlabel('External Field(mT/\mu_0)')
     legend('Original Data','Vel. Corrected')
     xlim([-PlotLims PlotLims])
     
@@ -150,7 +154,7 @@ if PlotFinal==1
     hold on,plot(MaxSigBias_Bucket,MaxSig_Bucket/max(MaxSig_Bucket),'Color',RProfileColor,'LineWidth',2)
     plot(MinSigBias_Bucket,MinSig_Bucket/max(abs(MinSig_Bucket)),'Color',LProfileColor,'LineWidth',2)
     ylabel('Normalized Rx Signal')
-    xlabel('External Field(T/\mu_0)')
+    xlabel('External Field(mT/\mu_0)')
     xlim([-PlotLims PlotLims])
     legend('Vel. Corrected','Left Scanning','Right Scanning')
     
@@ -158,18 +162,22 @@ if PlotFinal==1
     plot(MinSigBias_Bucket,-MinSig_Bucket/max(abs(MinSig_Bucket)),'Color',LProfileColor,'LineWidth',2)
     
     ylabel('Normalized Mag. Permeability')
-    xlabel('External Field(T/\mu_0)')
+    xlabel('External Field(mT/\mu_0)')
     xlim([-PlotLims PlotLims])
     legend('Left Scanning','Right Scanning')
     subplot(3,1,3),plot(MaxSigBias_Bucket,(Magnetization_R-mean([Magnetization_R(1),Magnetization_R(end)]))/maxMag,'Color',RProfileColor,'LineWidth',2)
     hold on
     plot(MinSigBias_Bucket,(Magnetization_L-mean([Magnetization_L(1),Magnetization_L(end)]))/maxMag,'Color',LProfileColor,'LineWidth',2)
     ylabel('Normalized Magnetization')
-    xlabel('External Field(T/\mu_0)')
+    xlabel('External Field(mT/\mu_0)')
     xlim([-PlotLims PlotLims])
     legend('Left Scanning','Right Scanning')
 end
+%% Analysis of data
 
+
+[FWHM_MaxData,MaxDeviation_MaxSig] = FWHM_PeakDetect(MaxSig_Bucket,MaxSigBias_Bucket);
+[FWHM_MinData,MaxDeviation_MinSig] = FWHM_PeakDetect(MinSig_Bucket,MinSigBias_Bucket);
 
 %%
 RMag_Output = (Magnetization_R-mean([Magnetization_R(1),Magnetization_R(end)]))/maxMag;
@@ -185,10 +193,29 @@ Outputs.MinSigBias_Bucket = MinSigBias_Bucket;
 Outputs.VelCorrectedSig = VelCorrectedSig;
 Outputs.BiasSig  =ExternalField;
 Outputs.Data_Sig = Data_Sig;
+Outputs.FWHM_MaxData = FWHM_MaxData;
+Outputs.FWHM_MinData = FWHM_MinData;
+
+Outputs.MaxDeviation_MaxSig = MaxDeviation_MaxSig;
+Outputs.MaxDeviation_MinSig = MaxDeviation_MinSig;
 
 Colors.VelCorColor = VelCorColor;
 Colors.RawData = RawData;
 Colors.LProfileColor= LProfileColor;
 Colors.RProfileColor= RProfileColor;
+
+end
+
+
+
+function [FWHM,MaxDeviationmT] = FWHM_PeakDetect(SigData,FieldData)
+SigData = abs(SigData);
+MaxDeviationmT = FieldData(SigData==max(SigData));
+FWHM_MaxDataMax_TMP  = FieldData(find(SigData<(.5*max(SigData)) & FieldData>MaxDeviationmT, 1 ));%This is the maximum value (lowest bias field) at the point where the signal is at the half-max
+
+FWHM_MaxDataMin_TMP  = FieldData(find(SigData<(.5*max(SigData)) & FieldData<MaxDeviationmT,1,'Last' )); %This is the minimum value (lowest bias field) at the point where the signal is at the half-max
+FWHM = FWHM_MaxDataMax_TMP-FWHM_MaxDataMin_TMP;
+
+
 
 end

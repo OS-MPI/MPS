@@ -24,12 +24,12 @@ Solenoid_Length_Rx = 10e-3;
 TubeDiam_Rx = .006; %Sets the ID of the bias coil
 
 [P_Rx] = Coil_Sensitivity_2(Wire_D_Rx,LayerGap_Rx,Solenoid_Length_Rx,Turns_Rx,TubeDiam_Rx);
-AnalysisParams.RxSensitivity =P_Rx;
+AnalysisParams.RxSensitivity =P_Rx; %In 1/m (or Amperes per meter per amp)
 
 SampleVolume = SPION_Info.Volume; %m^3
-DataSig = SigDataIn/(P_Rx*Gain*Parameters.BiasAmp_mT/1000*fDrive*SampleVolume);
+DataSig = SigDataIn/(P_Rx*Gain*Parameters.DriveAmp_mT/1000*2*pi*fDrive*SampleVolume*Conc);% Volts/(1/m*UL*T/sec*m^3*kg/m^3) = Volts/(T*kg/(m*sec)) = Volts/((V*sec/m^2)*kg/(m*sec)) =1/(kg/(m^3))= m^3/(kg) = 1/concentration 
 
-AnalysisParams.TotalScalingFactor = 1/(P_Rx*Gain*Parameters.BiasAmp_mT/1000*fDrive*SampleVolume);
+AnalysisParams.TotalScalingFactor = 1/(P_Rx*Gain*Parameters.DriveAmp_mT/1000*fDrive*SampleVolume*Conc);
 
 
 VoltsPerAmp = 0.04;
@@ -41,7 +41,7 @@ BiasSig = BiasSig/VoltsPerAmp*TeslaPerAmp; %Defining BiasSig in terms of Tesla o
 LPBias = smooth(BiasSig,smoothPts);
 LPBias = LPBias(round(smoothPts/2):end-round(smoothPts/2));
 
-[SPG,fSPG,~]= spectrogram(DataSig,smoothPts,smoothPts-1,smoothPts,fsInterp);
+[SPG,fSPG,~]= spectrogram(DataSig,smoothPts,smoothPts-1,smoothPts,fsInterp); %SPG is the spectrogram and fSPG is the freqs. that correspond
 
 fDriveSelectSig = abs(SPG(fSPG==fDrive,:)); %taking the magnitude of the specrogram at all of the points in time at the drive frequency
 
@@ -81,28 +81,28 @@ for K=1:2
     
 end
 if Normalize==1
-    figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i)/max(abs(MagSuscept(1:i))))
+    figure(95),subplot(2,1,1),plot(BiasField(1:i)*1000,MagSuscept(1:i)/max(abs(MagSuscept(1:i))))
     ylabel('dM/dH (Normalized)')
 else
-    figure(95),subplot(2,1,1),plot(BiasField(1:i),MagSuscept(1:i))
-    ylabel('dM/dH')
+    figure(95),subplot(2,1,1),plot(BiasField(1:i)*1000,MagSuscept(1:i))
+    ylabel('dM/dH [UL/(kg/m^3)]')
 end
 hold on
 xlabel('External Magnetic Field [T]')
 
 m(:,1)=flipud(m(:,1));
 m2=mean(m,2);
-Mag = m2/(4*pi*10e-7)/Conc;% Conc is is mg/ml which is also kg/m^3
+Mag = m2/(4*pi*10e-7);% Conc is is mg/ml which is also kg/m^3
 if Normalize==1
-    figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag/max(abs(Mag)),LineStyle,'LineWidth',1.3)
+    figure(95),subplot(2,1,2),plot(BiasField(2:end)*1000,Mag/max(abs(Mag)),LineStyle,'LineWidth',1.3)
     ylabel('Magnetization [a.u.]')
 else
-    figure(95),subplot(2,1,2),plot(BiasField(2:end),Mag,LineStyle,'LineWidth',1.3)
-    ylabel('Magnetization [Am^2/kg]')
+    figure(95),subplot(2,1,2),plot(BiasField(2:end)*1000,Mag,LineStyle,'LineWidth',1.3)
+    ylabel('Magnetization [\mu_0*Am^2/kg]')
 end
-xlabel('External Magnetic Field [T]')
+xlabel('External Magnetic Field [mT]')
 
-%legend('VivoTrax', 'Ocean NanoTech', 'Location', 'SE')
+
 hold on
 
 

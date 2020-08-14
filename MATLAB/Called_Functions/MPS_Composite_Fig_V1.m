@@ -1,0 +1,75 @@
+function [MPSFig] = MPS_Composite_Fig_V1(SPION_Info,UserData,Results,Color,Fig)
+
+PageWidth = 15.5; %inches
+FigWidth = PageWidth-1; %Inches
+FigHeight = 7; %inches
+if nargin<5
+    MPSFig = figure('Units','Inches','Position',[1 1 FigWidth FigHeight]);
+    TMP_Ax = subplot(2,3,3);
+    TextBoxPos = TMP_Ax.Position;
+    clf
+
+else
+    figure(Fig)
+end
+
+TmpAx = subplot(2,3,1);
+ hold on
+plot(Results.Magnetometry.Output.BiasFieldPlot,Results.Magnetometry.Output.Susceptibility,'Color',Color,'LineWidth',2,'LineStyle','-');
+xlabel('External Magnetic Field [mT]')
+ylabel('dM/dH')
+YLimits = TmpAx.YLim;
+YLimits(1) = 0;
+ylim(YLimits);
+% title({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
+
+subplot(2,3,4), hold on
+plot(Results.Magnetometry.Output.BiasFieldPlot(2:end),Results.Magnetometry.Output.Magnetization,'Color',Color,'LineWidth',2,'LineStyle','-')
+xlabel('External Magnetic Field [mT]')
+ylabel('Magnetization')
+RelaxColors = Results.Relaxometry.Output.RelaxColors;
+subplot(2,3,2), hold on
+plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.MaxSig_Bucket/max(Results.Relaxometry.Output.MaxSig_Bucket),'Color',Color,'LineWidth',2,'LineStyle','--')
+hold on
+plot(Results.Relaxometry.Output.MinSigBias_Bucket,abs(Results.Relaxometry.Output.MinSig_Bucket/max(abs(Results.Relaxometry.Output.MinSig_Bucket))),'Color',Color,'LineWidth',2,'LineStyle','-')
+
+legend('Right scanning','Left scannning')
+
+subplot(2,3,5), hold on
+plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.RMag_Output,'Color',Color,'LineWidth',2,'LineStyle','--')
+hold on
+plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.LMag_Output,'Color',Color,'LineWidth',2,'LineStyle','-')
+legend('Right scanning','Left scannning')
+% title({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
+
+
+subplot(2,3,6)
+semilogy(Results.Spectroscopy.ProcessedData.fVector,Results.Spectroscopy.ProcessedData.FFTMag1S,'Color','k','LineWidth',.5)
+fDrive = Results.Spectroscopy.Parameters.fDrive;
+
+PlotIndex  =mod(Results.Spectroscopy.ProcessedData.fVector,fDrive)==0 & Results.Spectroscopy.ProcessedData.fVector~= 0;
+PlotIndex = find(PlotIndex==1);
+hold on
+semilogy(Results.Spectroscopy.ProcessedData.fVector(PlotIndex(1:2:end)), Results.Spectroscopy.ProcessedData.FFTMag1S(PlotIndex(1:2:end)),'Color',Color,'LineWidth',2,'LineStyle','-','Marker','o')
+semilogy(Results.Spectroscopy.ProcessedData.fVector(PlotIndex(2:2:end)), Results.Spectroscopy.ProcessedData.FFTMag1S(PlotIndex(2:2:end)),'Color',Color,'LineStyle','none','Marker','o')
+
+% semilogy(f(mod(f,fDrive*2)==0 & f~= 0), FTMagnitude(mod(f,fDrive*2)==0 & f~= 0),'ro','LineWidth',2) %Mark even harmonics
+xlabel('Frequency')
+ylabel('Spectral Amplitude')
+sgtitle({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
+
+
+str = {['Particles: ', SPION_Info.Name];['Drive Freq. (kHz): ',num2str(Results.Magnetometry.Parameters.fDrive/1e3)];['Magnetometry Drive Amp (peak mT): ',num2str(round(Results.Magnetometry.Parameters.DriveAmp_mT,2))];...
+    ['Relaxometry Drive Amp ( peak mT): ',num2str(round(Results.Relaxometry.Parameters.DriveAmp_mT,2))];...
+    ['Spectroscopy Drive Amp (peak mT): ',num2str(round(Results.Spectroscopy.Parameters.DriveAmp_mT,2))]
+    ['Saturation Magnetization (\mu_0 * A/m per kg/m^3): ',num2str(Results.Magnetometry.Output.SaturationMag)]
+    
+    ['Max Peak Deviation R Scan(mT): ',num2str(round(Results.Relaxometry.Output.MaxDeviation_MaxSig,2))]
+    
+    ['FWHM R Scanning(mT): ',num2str(round(Results.Relaxometry.Output.FWHM_MaxData,2))]
+    
+    ['NonLinearity Index (F1/F3): ',num2str(Results.Spectroscopy.Output.NonlinearityIndex)]};
+if nargin<5
+    annotation('textbox',TextBoxPos,'String',str,'EdgeColor','none')
+end
+

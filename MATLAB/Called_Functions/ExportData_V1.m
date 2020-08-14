@@ -1,4 +1,4 @@
-function [] = ExportData_V1(SPION_Info,UserData,Results)
+function [] = ExportData_V1(SPION_Info,UserData,Results,CompositeFig)
 % This function should take in the essential data from one of the analysis
 % scripts and export it with a LaTeX document which can then be saved as a
 % PDF.
@@ -6,7 +6,10 @@ function [] = ExportData_V1(SPION_Info,UserData,Results)
 
 DateToday = date;
 Name = [SPION_Info.Name,'_',DateToday ];
+NamePrint = Name;
 Name(Name=='-')='_';
+Name(Name==' ') = [];
+Name(Name=='\') = [];
 eval([Name,'.SPION_Info','=SPION_Info'])
 eval([Name,'.UserData','=UserData'])
 eval([Name,'.Results','=Results'])
@@ -26,6 +29,7 @@ Params = {'Particle Name'
     'Notes'
     'User Name'
     'User Location'
+    'Total Acquisition Time (Seconds)'
     };
 Vals = {
     SPION_Info.Name
@@ -40,6 +44,7 @@ Vals = {
     SPION_Info.Notes
     UserData.Name
     UserData.Location
+    num2str(Results.TotalExperimentTime)
     };
 
 BasicData = table(Params,Vals);
@@ -51,7 +56,8 @@ if exist([Name_Orig])==7
         i = i+1;
     end
 end
-ExportFileName = [Name_New,'.tex'];
+ExportFileName = [Name_New,'/',Name,'.tex'];
+ExportFileName_MAT = [Name_New,'/',Name,'.mat'];
 mkdir(Name_New)
 writetable(BasicData,[Name_New,'/',Name,'.txt'])
 
@@ -61,7 +67,7 @@ subplot(2,1,1)
 plot(Results.Magnetometry.Output.BiasFieldPlot,Results.Magnetometry.Output.Susceptibility)
 xlabel('External Magnetic Field [mT]')
 ylabel('dM/dH')
-title({SPION_Info.Name;date})
+title({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
 
 subplot(2,1,2)
 plot(Results.Magnetometry.Output.BiasFieldPlot(2:end),Results.Magnetometry.Output.Magnetization)
@@ -89,7 +95,8 @@ MagParams = {'Sampling Freq.'
     'Pre-Amplifier Name'
     'Pre-Amplifier Gain'
     'Test Time'
-    'Number of Averages'};
+    'Number of Averages'
+    'Saturation Magnetization (\\mu_0 * A/m per kg/m^3)'};
 MagVals = {num2str(Results.Magnetometry.Parameters.fs)
     num2str(Results.Magnetometry.Parameters.fsInterp)
     num2str(Results.Magnetometry.Parameters.fDrive)
@@ -109,7 +116,8 @@ MagVals = {num2str(Results.Magnetometry.Parameters.fs)
     Results.Magnetometry.Parameters.PreAmpName
     num2str(Results.Magnetometry.Parameters.PreAmpGain)
     num2str(Results.Magnetometry.Parameters.TestTime)
-    num2str(Results.Magnetometry.Parameters.NumAverages)};
+    num2str(Results.Magnetometry.Parameters.NumAverages)
+    num2str(Results.Magnetometry.Output.SaturationMag)};
 
 MagParamsData = table(MagParams,MagVals);
 writetable(MagParamsData,[Name_New,'/',Name,'MagParams.txt']);
@@ -117,37 +125,151 @@ writetable(MagParamsData,[Name_New,'/',Name,'MagParams.txt']);
 
 
 %% Relaxometry (still need to update from the prev. version)
+RelaxColors = Results.Relaxometry.Output.RelaxColors;
 RelaxFig = figure('Units','Inches','Position',[1 1 7.5 5]);
+
 subplot(2,1,2)
-plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.MaxSig_Bucket/max(RelaxOutputs.MaxSig_Bucket),'Color',RelaxColors.RProfileColor,'LineWidth',2)
+plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.MaxSig_Bucket/max(Results.Relaxometry.Output.MaxSig_Bucket),'Color',RelaxColors.RProfileColor,'LineWidth',2)
 hold on
-plot(RelaxOutputs.MinSigBias_Bucket,abs(RelaxOutputs.MinSig_Bucket/max(abs(RelaxOutputs.MinSig_Bucket))),'Color',RelaxColors.LProfileColor,'LineWidth',2)
+plot(Results.Relaxometry.Output.MinSigBias_Bucket,abs(Results.Relaxometry.Output.MinSig_Bucket/max(abs(Results.Relaxometry.Output.MinSig_Bucket))),'Color',RelaxColors.LProfileColor,'LineWidth',2)
 
 legend('Right scanning','Left scannning')
 
 subplot(2,1,1)
-plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.RMag_Output,'Color',RelaxColors.RProfileColor,'LineWidth',2)
+plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.RMag_Output,'Color',RelaxColors.RProfileColor,'LineWidth',2)
 hold on
-plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.LMag_Output,'Color',RelaxColors.LProfileColor,'LineWidth',2)
+plot(Results.Relaxometry.Output.MaxSigBias_Bucket,Results.Relaxometry.Output.LMag_Output,'Color',RelaxColors.LProfileColor,'LineWidth',2)
 legend('Right scanning','Left scannning')
+title({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
 
 
 RelaxometryPath = [Name,'_RelaxFig.png'];
 print(RelaxFig,[Name_New,'/',RelaxometryPath],'-dpng')
+
+
+
+RelaxParams = {'Sampling Freq.'
+    'Interpolated Freq.'
+    'Drive Freq.'
+    'Bias Freq.'
+    'Bias Waveform Shape'
+    'Bias Amplitude (mT)'
+    'Bias Amplitude (Volts)'
+    'Bias Amplifier Name'
+    'Bias Current Monitor Volts Per Amp'
+    'Bias Field mT per Amp'
+    'Drive Amplitude (mT)'
+    'Drive Amplitude (Volts)'
+    'Drive Amplifier Name'
+    'Drive Current Monitor Volts Per Amp'
+    'Drive Field mT per Amp'
+    'Power Supply Name'
+    'Pre-Amplifier Name'
+    'Pre-Amplifier Gain'
+    'Test Time'
+    'Number of Averages'
+    'Max Peak Deviation R Scan(mT)'
+    'Max Peak Deviation L Scan(mT)'
+    'FWHM R Scanning(mT)'
+    'FWHM L Scanning(mT)'};
+RelaxVals = {num2str(Results.Relaxometry.Parameters.fs)
+    num2str(Results.Relaxometry.Parameters.fsInterp)
+    num2str(Results.Relaxometry.Parameters.fDrive)
+    num2str(Results.Relaxometry.Parameters.fBias)
+    Results.Relaxometry.Parameters.BiasWaveShape
+    num2str(Results.Relaxometry.Parameters.BiasAmp_mT)
+    num2str(Results.Relaxometry.Parameters.BiasAmp_Volts)
+    Results.Relaxometry.Parameters.BiasAmp_AmpName
+    num2str(Results.Relaxometry.Parameters.BiasImonVoltsPerAmp)
+    num2str(Results.Relaxometry.Parameters.Bias_mTPerAmp)
+    num2str(Results.Relaxometry.Parameters.DriveAmp_mT)
+    num2str(Results.Relaxometry.Parameters.DriveAmp_Volts)
+    Results.Relaxometry.Parameters.DriveAmp_AmpName
+    num2str(Results.Relaxometry.Parameters.DriveImonVoltsPerAmp)
+    num2str(Results.Relaxometry.Parameters.Drive_mTPerAmp)
+    Results.Relaxometry.Parameters.PowerSupplyName
+    Results.Relaxometry.Parameters.PreAmpName
+    num2str(Results.Relaxometry.Parameters.PreAmpGain)
+    num2str(Results.Relaxometry.Parameters.TestTime)
+    num2str(Results.Relaxometry.Parameters.NumAverages)
+    num2str(Results.Relaxometry.Output.MaxDeviation_MaxSig)
+    num2str(Results.Relaxometry.Output.MaxDeviation_MinSig)
+    num2str(Results.Relaxometry.Output.FWHM_MaxData)
+    num2str(Results.Relaxometry.Output.FWHM_MinData)
+    };
+
+RelaxParamsData = table(RelaxParams,RelaxVals);
+writetable(RelaxParamsData,[Name_New,'/',Name,'RelaxParams.txt']);
+
+
+
 %% Spectroscopy (still need to update from the prev. version)
 
-figure(12),semilogy(f,Mag,'k','LineWidth',0.5)
+
+SpecFig = figure('Units','Inches','Position',[1 1 7.5 5]);
+
+
+semilogy(Results.Spectroscopy.ProcessedData.fVector,Results.Spectroscopy.ProcessedData.FFTMag1S,'k','LineWidth',0.5)
+fDrive = Results.Spectroscopy.Parameters.fDrive;
+
+PlotIndex  =mod(Results.Spectroscopy.ProcessedData.fVector,fDrive)==0 & Results.Spectroscopy.ProcessedData.fVector~= 0;
+
 hold on
-semilogy(f(mod(f,fDrive)==0 & f~= 0), FTMagnitude(mod(f,fDrive)==0 & f~= 0),'bo','LineWidth',2)
-semilogy(f(mod(f,fDrive*2)==0 & f~= 0), FTMagnitude(mod(f,fDrive*2)==0 & f~= 0),'ro','LineWidth',2)
+semilogy(Results.Spectroscopy.ProcessedData.fVector(PlotIndex), Results.Spectroscopy.ProcessedData.FFTMag1S(PlotIndex),'bo','LineWidth',2)
+% semilogy(f(mod(f,fDrive*2)==0 & f~= 0), FTMagnitude(mod(f,fDrive*2)==0 & f~= 0),'ro','LineWidth',2) %Mark even harmonics
 xlabel('Frequency')
 ylabel('Spectral Amplitude')
+title({[SPION_Info.Name ' , ' num2str(SPION_Info.Concentration*SPION_Info.Volume),' mg'];date})
+
+
+SpectroscopyPath = [Name,'_SpecFig.png'];
+print(SpecFig,[Name_New,'/',SpectroscopyPath],'-dpng')
+
+
+SpecParams = {'Sampling Freq.'
+    'Interpolated Freq.'
+    'Drive Freq.'
+    'Drive Amplitude (mT)'
+    'Drive Amplitude (Volts)'
+    'Drive Amplifier Name'
+    'Drive Current Monitor Volts Per Amp'
+    'Drive Field mT per Amp'
+    'Power Supply Name'
+    'Pre-Amplifier Name'
+    'Pre-Amplifier Gain'
+    'Test Time'
+    'Number of Averages'
+    'NonLinearity Index (F1/F3)'};
+SpecVals = {num2str(Results.Spectroscopy.Parameters.fs)
+    num2str(Results.Spectroscopy.Parameters.fsInterp)
+    num2str(Results.Spectroscopy.Parameters.fDrive)
+    num2str(Results.Spectroscopy.Parameters.DriveAmp_mT)
+    num2str(Results.Spectroscopy.Parameters.DriveAmp_Volts)
+    Results.Spectroscopy.Parameters.DriveAmp_AmpName
+    num2str(Results.Spectroscopy.Parameters.DriveImonVoltsPerAmp)
+    num2str(Results.Spectroscopy.Parameters.Drive_mTPerAmp)
+    Results.Spectroscopy.Parameters.PowerSupplyName
+    Results.Spectroscopy.Parameters.PreAmpName
+    num2str(Results.Spectroscopy.Parameters.PreAmpGain)
+    num2str(Results.Spectroscopy.Parameters.TestTime)
+    num2str(Results.Spectroscopy.Parameters.NumAverages)
+    num2str(Results.Spectroscopy.Output.NonlinearityIndex)};
+
+SpecParamsData = table(SpecParams,SpecVals);
+writetable(SpecParamsData,[Name_New,'/',Name,'SpecParams.txt']);
+
+
 
 
 %% General Fig
-figure(SaveFig)
+if nargin>3
+    figure(CompositeFig)
+else
+    [CompositeFig] = MPS_Composite_Fig_V1(SPION_Info,UserData,Results,'b');
+end
+GenFigPath = [Name,'_CompositeFig.png'];
 savefig([Name_New,'/',Name])
-print(SaveFig,[Name_New,'/',Name,'.png'],'-dpng')
+print(CompositeFig,[Name_New,'/',GenFigPath],'-dpng')
 clear SaveFig
 save([Name_New,'/',Name],Name)
 
@@ -163,27 +285,45 @@ for i = 1:height(BasicData)
     
 end
 TextStr = [TextStr,'\\end{itemize}\n'];
+
+GeneralFigCaption = 'A summary of the experiment';
+[TextStr] = FigText(TextStr,GenFigPath,GeneralFigCaption);
+
 TextStr = [TextStr,'\n\\section{Magnetometry}\n\n\\begin{itemize}'];
 for i = 1:height(MagParamsData)
     
-    TextStr = [TextStr,'\\textbf{',MagParamsData.MagParams{i},'}:',MagParamsData.MagVals{i} ,'\n'];
+    TextStr = [TextStr,'\t\\item{\\textbf{',MagParamsData.MagParams{i},'}:',MagParamsData.MagVals{i} ,'}\n'];
     
 end
 TextStr = [TextStr,'\\end{itemize}\n'];    
 MagnetometryCaption = 'TestCaption for Mag';
 [TextStr] = FigText(TextStr,MagnetometryPath,MagnetometryCaption);
 
+RelaxometryCaption = 'Results from the relaxometry experiment';
 TextStr = [TextStr,'\n\\section{Relaxometry}\n\\begin{itemize}'];
+TextStr = [TextStr,'\n\\section{Magnetometry}\n\n\\begin{itemize}'];
+for i = 1:height(RelaxParamsData)
+    
+    TextStr = [TextStr,'\t\\item{\\textbf{',RelaxParamsData.RelaxParams{i},'}:',RelaxParamsData.RelaxVals{i} ,'}\n'];
+    
+end
 [TextStr] = FigText(TextStr,RelaxometryPath,RelaxometryCaption);
 
 
 TextStr = [TextStr,'\\end{itemize}\n'];
-
+SpectroscopyCaption = 'Results from the spectroscopy';
 TextStr = [TextStr,'\n\\section{Spectroscopy}\n\\begin{itemize}'];
+
+for i = 1:height(SpecParamsData)
+    
+    TextStr = [TextStr,'\t\\item{\\textbf{',SpecParamsData.SpecParams{i},'}:',SpecParamsData.SpecVals{i} ,'}\n'];
+    
+end
+
 [TextStr] = FigText(TextStr,SpectroscopyPath,SpectroscopyCaption);
 
 TextStr = [TextStr,'\\end{itemize}\n'];
-
+% save(ExportFileName_MAT,'SPION_Info','UserData','Results')
 FileID = fopen(ExportFileName,'w');
 fprintf(FileID,[OpeningText TextStr EndText]);
 fclose(FileID);

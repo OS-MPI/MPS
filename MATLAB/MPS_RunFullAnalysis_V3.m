@@ -10,26 +10,27 @@
 
 
 %% Setup and parameter definition
-% close all
+close all
 clear all
 addpath([pwd '\Called_Functions'])
 
 
 TESTMODE = 0; %Set this to 1 to prevent the motor homing loop (If the motor isn't plugged it, it makes it a pain to debug without this)
 
-
+tic
+StartTic = 1;
 %%%%%%%%%%%%%%%%%%%%%
 %%%% SPION Info %%%%%%
-SPION_Info.Name = 'TEMP';
-SPION_Info.Manufacturer = 'TMP';
-SPION_Info.Lot = 'TMP';
-SPION_Info.DateMade = 'DD-MMM-YYYY';
-SPION_Info.CoreSize = 10; %nm
-SPION_Info.HydroSize = 40; %nm
-SPION_Info.Concentration = 10; %mg Fe/ml
+SPION_Info.Name = 'VivoTrax9ug';
+SPION_Info.Manufacturer = 'Magnetic Insight';
+SPION_Info.Lot = '';
+SPION_Info.DateMade = ''; %DD-MMM-YYYY
+SPION_Info.CoreSize = 999; %nm
+SPION_Info.HydroSize = 999; %nm
+SPION_Info.Concentration = .5; %mg Fe/ml
 SPION_Info.Volume = 18e-3; %ml
-SPION_Info.Coating = 'Dextran';
-SPION_Info.Notes = 'This is a test \n This is a test line two';
+SPION_Info.Coating = '';
+SPION_Info.Notes = 'There is a small bubble';
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,9 +42,11 @@ UserData.Location = 'Martinos Center, Boston, MA, USA';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Magnetometry %%%%%%%
-fs = 500e3;
+fs =1e6; % Sampling rate in Hz -- Target value
 Results.Magnetometry.Parameters.fs = fs;
-fDrive = 25e3;
+fDrive = 24.3e3;
+
+
 Results.Magnetometry.Parameters.fDrive = fDrive;
 Results.Magnetometry.Parameters.fsInterp = floor(fs/fDrive)*fDrive;
 fsInterp= Results.Magnetometry.Parameters.fsInterp;
@@ -57,20 +60,24 @@ Results.Magnetometry.Parameters.DriveImonVoltsPerAmp = 0.1;
 Results.Magnetometry.Parameters.Drive_mTPerAmp = 2;
 Results.Magnetometry.Parameters.BiasImonVoltsPerAmp = 0.04;
 Results.Magnetometry.Parameters.Bias_mTPerAmp = 6;
-Results.Magnetometry.Parameters.PowerSupplyName = 'ExTech Instruments 382275 SMPS';
+Results.Magnetometry.Parameters.PowerSupplyName = 'Tenma 72-7245';
 Results.Magnetometry.Parameters.PreAmpName = 'INA217 V0';
 Results.Magnetometry.Parameters.PreAmpGain = 100; %Check Value
 Results.Magnetometry.Parameters.PreAmpTurnCount = 450; %Check Value
-TestTime = 1;
+TestTime = 2; % How long each aquisition is in seconds
 TestTime = round(TestTime*fDrive)/fDrive; %ensuring an even number of periods
 Results.Magnetometry.Parameters.TestTime = TestTime;
-NumAverages = 1;
+NumAverages = 2;
 Results.Magnetometry.Parameters.NumAverages = NumAverages;
 
-TargetDrivemT = 1;
-TargetDriveCurrent = Results.Magnetometry.Parameters.Drive_mTPerAmp;
+            TargetDrivemT = 2; %This is just a target, the actual value is measured after acquisition
+            
+            
+TargetDriveCurrent = TargetDrivemT/Results.Magnetometry.Parameters.Drive_mTPerAmp;
 DriveAmpGain = 10;
-FilterConfigSpiceFile = 'MPS_V0_25kHzConfig.txt';
+FilterConfigSpiceFile = 'MPS_V0_25kHzConfig.txt'; %3800Hz, 24.3kHz
+% FilterConfigSpiceFile = 'MPS_V0_40kHzConfig.txt'; %23kHz 44.8kHz
+
 DriveFiltImpedance = 1/(SpiceTFData2Mag(FilterConfigSpiceFile,fDrive));
 Results.Magnetometry.Parameters.DriveAmp_Volts = DriveFiltImpedance*TargetDriveCurrent/DriveAmpGain;
 MagDriveAmp = Results.Magnetometry.Parameters.DriveAmp_Volts; %Just abbreviating the variable name;
@@ -84,10 +91,12 @@ MagBiasAmp = Results.Magnetometry.Parameters.BiasAmp_Volts;
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Relaxometry  %%%%%%%
 Results.Relaxometry.Parameters = Results.Magnetometry.Parameters;
-TargetDrivemT = 6;
-TargetDriveCurrent = Results.Relaxometry.Parameters.Drive_mTPerAmp;
+
+                TargetDrivemT = 15;%This is just a target, the actual value is measured after acquisition
+                
+TargetDriveCurrent = TargetDrivemT/Results.Relaxometry.Parameters.Drive_mTPerAmp;
 DriveAmpGain = 10;
-FilterConfigSpiceFile = 'MPS_V0_25kHzConfig.txt';
+% FilterConfigSpiceFile = 'MPS_V0_25kHzConfig.txt';
 DriveFiltImpedance = 1/(SpiceTFData2Mag(FilterConfigSpiceFile,fDrive));
 Results.Relaxometry.Parameters.DriveAmp_Volts = DriveFiltImpedance*TargetDriveCurrent/DriveAmpGain;
 RelaxDriveAmp = Results.Relaxometry.Parameters.DriveAmp_Volts; %Just abbreviating the variable name;
@@ -102,15 +111,41 @@ RelaxBiasAmp = Results.Relaxometry.Parameters.BiasAmp_Volts;
 %%%%% Spectroscopy %%%%%%%
 Results.Spectroscopy.Parameters  = Results.Magnetometry.Parameters;
 
-TargetDrivemT = 6;
-TargetDriveCurrent = Results.Spectroscopy.Parameters.Drive_mTPerAmp;
+% TargetDrivemT = 5;%This is just a target, the actual value is measured after acquisition
+TargetDriveCurrent = TargetDrivemT/Results.Spectroscopy.Parameters.Drive_mTPerAmp;
 DriveAmpGain = 10;
-FilterConfigSpiceFile = 'MPS_V0_25kHzConfig.txt';
+% FilterConfigSpiceFile = 'MPS_V0_25kHzConfig.txt';
 DriveFiltImpedance = 1/(SpiceTFData2Mag(FilterConfigSpiceFile,fDrive));
 Results.Spectroscopy.Parameters.DriveAmp_Volts = DriveFiltImpedance*TargetDriveCurrent/DriveAmpGain;
 SpecDriveAmp = Results.Spectroscopy.Parameters.DriveAmp_Volts; %Just abbreviating the variable name;
 
 disp('Parameters Defined')
+
+
+%%%%%%%% OVERWRITE PARAMETERS WITH SAVED DATA %%%%%%%
+Overwrite = input('Do you want to overwrite with saved parameters (1=Yes or 0=No)');
+
+if Overwrite==1
+    load('StandardParams.mat')
+    fBias = Results.Magnetometry.Parameters.fBias;
+    fs = Results.Magnetometry.Parameters.fs;
+    fsInterp  = Results.Magnetometry.Parameters.fsInterp;
+    fDrive = Results.Magnetometry.Parameters.fDrive;
+    NumAverages = Results.Magnetometry.Parameters.NumAverages;
+    TestTime = Results.Magnetometry.Parameters.TestTime;
+    
+    
+    MagBiasAmp = Results.Magnetometry.Parameters.BiasAmp_Volts;
+    MagDriveAmp = Results.Magnetometry.Parameters.DriveAmp_Volts;
+    
+    RelaxBiasAmp = Results.Relaxometry.Parameters.BiasAmp_Volts;
+    RelaxDriveAmp = Results.Relaxometry.Parameters.DriveAmp_Volts;
+    
+    SpecDriveAmp =  Results.Spectroscopy.Parameters.DriveAmp_Volts;
+    
+    disp('Parameters overwritten')
+end
+
 
 
 
@@ -139,7 +174,13 @@ Results.Magnetometry.Parameters.fs = fs;
 Results.Relaxometry.Parameters.fs = fs;
 Results.Spectroscopy.Parameters.fs = fs;
 
+if fs==fsInterp
+    InterpNeeded=0;%if the sampling rate is already correct, no interpolation is needed
+else
+    InterpNeeded = 1;
+end
 
+InterpNeeded=1;
 disp('NIDAQ Configured')
 
 
@@ -162,9 +203,12 @@ BulbLocation=231; %for us, this is the number of steps which set a bulb to be in
 
 PointsPerBiasPeriod = fsInterp/fBias;
 BiasPeriods_Crop = 2;
-PointsToCrop = BiasPeriods_Crop*PointsPerBiasPeriod;
+PointsToCrop = BiasPeriods_Crop*PointsPerBiasPeriod+1;
 
 disp('Arduino Configured')
+
+
+FindBulbPosition = 0; %If this is a 1 the system will search for the ideal position for the bulb, otherwise it will use the previously defined value
 
 
 %% Run N points to position sample
@@ -173,46 +217,51 @@ disp('Arduino Configured')
 % recording and sets the position with max signal to be the location which
 % data should be recorded at
 
-writeDigitalPin(a,EnablePin,0)
-writeDigitalPin(a,DirPin,1)
-%back to position 0
-ButtonStatus = readDigitalPin(a,ButtonPin);
-while ButtonStatus==1&&TESTMODE==0
+
+if FindBulbPosition == 1
+    
+    writeDigitalPin(a,EnablePin,0)
+    writeDigitalPin(a,DirPin,1)
+    %back to position 0
     ButtonStatus = readDigitalPin(a,ButtonPin);
-    writeDigitalPin(a,Step,1);
-    writeDigitalPin(a,Step,0);
+    while ButtonStatus==1&&TESTMODE==0
+        ButtonStatus = readDigitalPin(a,ButtonPin);
+        writeDigitalPin(a,Step,1);
+        writeDigitalPin(a,Step,0);
+    end
+    
+    writeDigitalPin(a,DirPin,0) %change direction
+    pause(PTime);
+    
+    for j=1:200
+        writeDigitalPin(a,Step,1);
+        writeDigitalPin(a,Step,0);
+    end
+    N = 45; %N is the number of pulses that the motor turns while evaluating signal between each pulse
+    %45 full steps is sufficient for our hardware setup
+    F0Mag = zeros(N,1);
+    figure(2),clf
+    for i = 1:N
+        data = SendData(s,MagDriveAmp,0,fs,.2, fBias, fDrive);
+        if InterpNeeded==1
+            data = ResampleData(data,fs,fsInterp,fDrive);
+        end
+        [F0Mag_Tmp,~]=FourierAmplitude_2(data(:,1),fsInterp,fDrive,1);
+        F0Mag(i) = F0Mag_Tmp(1);
+        
+        figure(2),plot(i,F0Mag(i),'rd','LineWidth',3)
+        hold on
+        
+        writeDigitalPin(a,Step,1);
+        writeDigitalPin(a,Step,0);
+        
+        
+    end
+    writeDigitalPin(a,EnablePin,1)
+    
+    [AmplitudeMax, BulbLocation]=max(F0Mag);
+    BulbLocation=BulbLocation+200;
 end
-
-writeDigitalPin(a,DirPin,0) %change direction
-pause(PTime);
-
-for j=1:200
-    writeDigitalPin(a,Step,1);
-    writeDigitalPin(a,Step,0);
-end
-N = 45; %N is the number of pulses that the motor turns while evaluating signal between each pulse
-%45 full steps is sufficient for our hardware setup
-F0Mag = zeros(N,1);
-figure(2),clf
-for i = 1:N
-    data = SendData(s,MagDriveAmp,0,fs,.2, fBias, fDrive);
-    data = ResampleData(data,fs,fsInterp,fDrive);
-    [F0Mag_Tmp,~]=FourierAmplitude_2(data(:,1),fsInterp,fDrive,1);
-    F0Mag(i) = F0Mag_Tmp(1);
-    
-    figure(2),plot(i,F0Mag(i),'rd','LineWidth',3)
-    hold on
-    
-    writeDigitalPin(a,Step,1);
-    writeDigitalPin(a,Step,0);
-    
-    
-end
-writeDigitalPin(a,EnablePin,1)
-
-[AmplitudeMax, BulbLocation]=max(F0Mag);
-BulbLocation=BulbLocation+200;
-
 %% Acquire data with sample in
 %back to position 0
 
@@ -286,7 +335,7 @@ for LoopNum=1:NumAverages %The number of times the "magnetometry" procedure will
     clear RelaxData_NoDrive_TMP
     
     disp('Sample in (no drive field) data collected')
-
+    
     %Acquire data with sample out
     %back to position 0
     writeDigitalPin(a,EnablePin,0)
@@ -301,7 +350,7 @@ for LoopNum=1:NumAverages %The number of times the "magnetometry" procedure will
     pause(PTime);
     
     disp('Sample out, motor home')
-
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%% SAMPLE OUT %%%%%%%%%%%%%%%%%%%%
     
@@ -346,13 +395,13 @@ for LoopNum=1:NumAverages %The number of times the "magnetometry" procedure will
     SpecAverage_Signaldata(:,LoopNum) = mean(SpecData_Reshape,1);
     
     
-    norm_average_data=(RelxAverage_Signaldata(:,LoopNum)-mean(RelxAverage_Signaldata(:,LoopNum)))/max(abs(RelxAverage_Signaldata(:,LoopNum)-mean(RelxAverage_Signaldata(:,LoopNum))));%normalizing
+    norm_average_data=(MagAverage_Signaldata(:,LoopNum)-mean(MagAverage_Signaldata(:,LoopNum)))/max(abs(MagAverage_Signaldata(:,LoopNum)-mean(MagAverage_Signaldata(:,LoopNum))));%normalizing
     
     tBiasPeriod = 1/fsInterp:1/fsInterp:1/fBias;
     figure(LoopFigNum),plot(tBiasPeriod,norm_average_data, 'b')
     title(['Data from trial number ' num2str(LoopNum)])
     xlabel('Time [s]')
-    legend('Signal', 'Biasing','Location','northwest')
+    legend('Signal','Location','northwest')
     disp(num2str(LoopNum))
 end
 %%
@@ -404,7 +453,7 @@ MagDriveSmoothTmp = smooth(mean(MagData_NoBias,2),5);
 MagDriveSmoothTmp = MagDriveSmoothTmp-mean(MagDriveSmoothTmp);
 MagDrive_IMon_InPhase = MagDriveSmoothTmp/max(MagDriveSmoothTmp)*max(MagData_Drive_IMon_SmoothTmp);
 Results.Magnetometry.Parameters.DriveAmp_mT = ...
-        Results.Magnetometry.Parameters.Drive_mTPerAmp/(max(MagData_Drive_IMon_SmoothTmp)/Results.Magnetometry.Parameters.DriveImonVoltsPerAmp); %mT/Amp(Volts/(Volts/Amp))
+    Results.Magnetometry.Parameters.Drive_mTPerAmp*(max(MagData_Drive_IMon_SmoothTmp)/Results.Magnetometry.Parameters.DriveImonVoltsPerAmp); %(mT/Amp)*[Volts/(Volts/Amp)] = (mT/Amp)*[Amps*Volts/(Volts)]
 
 MagDrive_IMon_InPhase_RS_TMP = reshape(MagDrive_IMon_InPhase(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
 
@@ -419,28 +468,64 @@ RelaxData_Drive_IMon = SendData(s,RelaxDriveAmp,0,fs,TestTime, fBias, fDrive);%a
 RelaxData_Drive_IMon = ResampleData(RelaxData_Drive_IMon,fs,fsInterp,fDrive);
 RelaxData_Drive_IMon = RelaxData_Drive_IMon(PointsToCrop:end);
 RelaxDriveIMon_Reshape = reshape(RelaxData_Drive_IMon(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
-RelaxAaverage_Drivedata= mean(RelaxDriveIMon_Reshape,1);
-Results.Magnetometry.RawData.RawDriveImon  = RelaxAaverage_Drivedata-mean(RelaxAaverage_Drivedata);
+RelaxAverage_Drivedata= mean(RelaxDriveIMon_Reshape,1);
+Results.Relaxometry.RawData.RawDriveImon  = RelaxAverage_Drivedata-mean(RelaxAverage_Drivedata);
 
 
 clear RelaxDriveIMon_Reshape RelaxAaverage_Drivedata
 
 RelaxData_Drive_IMon_SmoothTmp = smooth(RelaxData_Drive_IMon,5);
 RelaxData_Drive_IMon_SmoothTmp = RelaxData_Drive_IMon_SmoothTmp-mean(RelaxData_Drive_IMon_SmoothTmp);
+
 RelaxDriveSmoothTmp = smooth(mean(RelaxData_NoBias,2),5);
 RelaxDriveSmoothTmp = RelaxDriveSmoothTmp-mean(RelaxDriveSmoothTmp);
 RelaxDrive_IMon_InPhase = RelaxDriveSmoothTmp/max(RelaxDriveSmoothTmp);
 Results.Relaxometry.Parameters.DriveAmp_mT = ...
-        Results.Relaxometry.Parameters.Drive_mTPerAmp/(max(RelaxData_Drive_IMon_SmoothTmp)/Results.Relaxometry.Parameters.DriveImonVoltsPerAmp); %mT/Amp(Volts/(Volts/Amp))
+    Results.Relaxometry.Parameters.Drive_mTPerAmp*(max(RelaxData_Drive_IMon_SmoothTmp)/Results.Relaxometry.Parameters.DriveImonVoltsPerAmp); %mT/Amp*(Volts/(Volts/Amp))
 
- clear    RelaxData_Drive_IMon_SmoothTmp   RelaxDriveSmoothTmp   RelaxData_NoBias 
-  
+clear    RelaxData_Drive_IMon_SmoothTmp   RelaxDriveSmoothTmp   RelaxData_NoBias
+
 RelaxDrive_IMon_InPhase_RS_TMP = reshape(RelaxDrive_IMon_InPhase(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
 
 RelaxDrive_IMon_InPhase_OnePeriod = mean(RelaxDrive_IMon_InPhase_RS_TMP,1)*Results.Relaxometry.Parameters.DriveAmp_mT; %Units of mT
 Results.Relaxometry.ProcessedData.DriveField = repmat(RelaxDrive_IMon_InPhase_OnePeriod(:),2,1);
 
-clear RelaxDrive_IMon_InPhase_RS_TMP   RelaxDrive_IMon_InPhase 
+clear RelaxDrive_IMon_InPhase_RS_TMP   RelaxDrive_IMon_InPhase
+
+
+
+
+SpecData_Drive_IMon = SendData(s,SpecDriveAmp,0,fs,TestTime, fBias, fDrive);%acquire data, with bias field and drive field
+SpecData_Drive_IMon = ResampleData(SpecData_Drive_IMon,fs,fsInterp,fDrive);
+SpecData_Drive_IMon = SpecData_Drive_IMon(PointsToCrop:end);
+SpecDriveIMon_Reshape = reshape(SpecData_Drive_IMon(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
+SpecAverage_Drivedata= mean(SpecDriveIMon_Reshape,1);
+Results.Spectroscopy.RawData.RawDriveImon  = SpecAverage_Drivedata-mean(SpecAverage_Drivedata);
+
+
+clear SpecDriveIMon_Reshape SpecAaverage_Drivedata
+
+SpecData_Drive_IMon_SmoothTmp = smooth(SpecData_Drive_IMon,5);
+SpecData_Drive_IMon_SmoothTmp = SpecData_Drive_IMon_SmoothTmp-mean(SpecData_Drive_IMon_SmoothTmp);
+
+SpecDriveSmoothTmp = smooth(mean(SpecData_NoBias,2),5);
+SpecDriveSmoothTmp = SpecDriveSmoothTmp-mean(SpecDriveSmoothTmp);
+SpecDrive_IMon_InPhase = SpecDriveSmoothTmp/max(SpecDriveSmoothTmp);
+Results.Spectroscopy.Parameters.DriveAmp_mT = ...
+    Results.Spectroscopy.Parameters.Drive_mTPerAmp*(max(SpecData_Drive_IMon_SmoothTmp)/Results.Spectroscopy.Parameters.DriveImonVoltsPerAmp); %mT/Amp*(Volts/(Volts/Amp))
+
+clear    SpecData_Drive_IMon_SmoothTmp   SpecDriveSmoothTmp   RelaxData_NoBias
+
+SpecDrive_IMon_InPhase_RS_TMP = reshape(SpecDrive_IMon_InPhase(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
+
+SpecDrive_IMon_InPhase_OnePeriod = mean(SpecDrive_IMon_InPhase_RS_TMP,1)*Results.Spectroscopy.Parameters.DriveAmp_mT; %Units of mT
+Results.Spectroscopy.ProcessedData.DriveField = repmat(SpecDrive_IMon_InPhase_OnePeriod(:),2,1);
+
+clear SpecDrive_IMon_InPhase_RS_TMP   SpecDrive_IMon_InPhase
+
+
+
+
 
 removeChannel(s,3); %Removing the Drive Current signal channel to limit the number of input signals and maximize sampling rate
 
@@ -466,23 +551,24 @@ Results.Magnetometry.RawData.RawBiasImon  = MagAverage_Biasdata;
 MagNorm_BiasData= MagAverage_Biasdata/max(MagAverage_Biasdata);
 
 
-clear  MagBiasIMon_Reshape  MagAverage_Biasdata  
+clear  MagBiasIMon_Reshape  MagAverage_Biasdata
 
 
 MagData_Bias_IMon_Smooth= smooth(MagData_Bias_IMon,PointsPerBiasPeriod/25); %
 Bias_IMon_InPhase_RS_TMP = reshape(MagData_Bias_IMon_Smooth(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
 
 MagBias_IMon_InPhase_OnePeriod = mean(Bias_IMon_InPhase_RS_TMP,1);
+MagBias_IMon_InPhase_OnePeriod = MagBias_IMon_InPhase_OnePeriod-mean(MagBias_IMon_InPhase_OnePeriod);
 Results.Magnetometry.ProcessedData.BiasField = repmat(MagBias_IMon_InPhase_OnePeriod(:),2,1);
 Results.Magnetometry.Parameters.BiasAmp_mT = ...
-    Results.Magnetometry.Parameters.Bias_mTPerAmp/(max(MagBias_IMon_InPhase_OnePeriod)/Results.Magnetometry.Parameters.BiasImonVoltsPerAmp); %mT/Amp(Volts/(Volts/Amp))
-clear MagData_Bias_IMon_Smooth   MagData_Bias_IMon    Bias_IMon_InPhase_RS_TMP     MagBias_IMon_InPhase_OnePeriod    
+    Results.Magnetometry.Parameters.Bias_mTPerAmp*(max(MagBias_IMon_InPhase_OnePeriod)/Results.Magnetometry.Parameters.BiasImonVoltsPerAmp); %mT/Amp(Volts/(Volts/Amp))
+clear MagData_Bias_IMon_Smooth   MagData_Bias_IMon    Bias_IMon_InPhase_RS_TMP     MagBias_IMon_InPhase_OnePeriod
 
 Results.Magnetometry.ProcessedData.BiasField  = circshift(Results.Magnetometry.ProcessedData.BiasField ,1100);
 
 
 
-RelaxData_Bias_IMon = SendData(s,0,RelaxBiasAmp,fs,TestTime, fBias, fDrive);%acquire data, with bias field 
+RelaxData_Bias_IMon = SendData(s,0,RelaxBiasAmp,fs,TestTime, fBias, fDrive);%acquire data, with bias field
 RelaxData_Bias_IMon = ResampleData(RelaxData_Bias_IMon,fs,fsInterp,fDrive);
 RelaxData_Bias_IMon = RelaxData_Bias_IMon(PointsToCrop:end);
 RelaxBiasIMon_Reshape = reshape(RelaxData_Bias_IMon(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
@@ -497,10 +583,11 @@ RelaxData_Bias_IMon_Smooth= smooth(RelaxData_Bias_IMon,PointsPerBiasPeriod/25);
 Bias_IMon_InPhase_RS_TMP = reshape(RelaxData_Bias_IMon_Smooth(1:end-ExtraPoints),PointsPerBiasPeriod,NumBiasPeriods)';
 
 RelaxBias_IMon_InPhase_OnePeriod = mean(Bias_IMon_InPhase_RS_TMP,1);
+RelaxBias_IMon_InPhase_OnePeriod = RelaxBias_IMon_InPhase_OnePeriod-mean(RelaxBias_IMon_InPhase_OnePeriod);
 Results.Relaxometry.ProcessedData.BiasField = repmat(RelaxBias_IMon_InPhase_OnePeriod(:),2,1);
 Results.Relaxometry.Parameters.BiasAmp_mT = ...
-    Results.Relaxometry.Parameters.Bias_mTPerAmp/(max(RelaxBias_IMon_InPhase_OnePeriod)/Results.Relaxometry.Parameters.BiasImonVoltsPerAmp); %mT/Amp(Volts/(Volts/Amp))
-clear RelaxData_Bias_IMon_Smooth    Bias_IMon_InPhase_RS_TMP    RelaxBias_IMon_InPhase_OnePeriod  
+    Results.Relaxometry.Parameters.Bias_mTPerAmp*(max(RelaxBias_IMon_InPhase_OnePeriod)/Results.Relaxometry.Parameters.BiasImonVoltsPerAmp); %mT/Amp(Volts/(Volts/Amp))
+clear RelaxData_Bias_IMon_Smooth    Bias_IMon_InPhase_RS_TMP    RelaxBias_IMon_InPhase_OnePeriod
 
 
 Results.Relaxometry.ProcessedData.BiasField  = circshift(Results.Relaxometry.ProcessedData.BiasField ,1100);
@@ -523,13 +610,17 @@ Results.Relaxometry.ProcessedData.BiasField = Results.Relaxometry.ProcessedData.
 % ylim([-1 1])
 % disp('Data Acquisition Done')
 
+Results.Magnetometry.RawData.TimeVec = 0:1/fsInterp:(length(Results.Magnetometry.RawData.RawSignal)-1)/fsInterp;
+tMag = Results.Magnetometry.RawData.TimeVec;
 
-[MagOutputs,MagParams]=Magnetometry_V1(SPION_Info,Results.Magnetometry.Parameters,Results.Magnetometry.RawData.RawSignal(:),Results.Magnetometry.ProcessedData.BiasField(:),50,'-');
+PointsPerDrivePrd = Results.Magnetometry.Parameters.fsInterp/Results.Magnetometry.Parameters.fDrive;
+[MagOutputs,MagParams]=Magnetometry_V1(SPION_Info,Results.Magnetometry.Parameters,Results.Magnetometry.RawData.RawSignal(:),Results.Magnetometry.ProcessedData.BiasField(:),PointsPerDrivePrd*2,'-');
 
-Results.Magnetometry.Output.BiasFieldPlot = MagOutputs.BiasFieldPlot ;
+Results.Magnetometry.Output.BiasFieldPlot = MagOutputs.BiasFieldPlot*1000 ;
 Results.Magnetometry.Output.Susceptibility = MagOutputs.Susceptibility;
 Results.Magnetometry.Output.Magnetization = MagOutputs.Magnetization;
 Results.Magnetometry.Output.MagParams = MagParams;
+Results.Magnetometry.Output.SaturationMag = max(Results.Magnetometry.Output.Magnetization);
 clear MagOutputs MagParams
 %% Relaxometry Analysis
 
@@ -552,10 +643,12 @@ Results.Relaxometry.Output.LMag_Output = RelaxOutputs.LMag_Output;
 Results.Relaxometry.Output.MaxSigBias_Bucket = RelaxOutputs.MaxSigBias_Bucket;
 Results.Relaxometry.Output.MinSigBias_Bucket = RelaxOutputs.MinSigBias_Bucket;
 Results.Relaxometry.Output.VelCorrectedSig = RelaxOutputs.VelCorrectedSig;
-Results.Relaxometry.Output.ExternalField  = RelaxOutputs.ExternalField;
-
-
-%% Spectroscopy Analysis 
+Results.Relaxometry.Output.RelaxColors = RelaxColors;
+Results.Relaxometry.Output.FWHM_MaxData = RelaxOutputs.FWHM_MaxData;
+Results.Relaxometry.Output.FWHM_MinData = RelaxOutputs.FWHM_MinData;
+Results.Relaxometry.Output.MaxDeviation_MaxSig = RelaxOutputs.MaxDeviation_MaxSig;
+Results.Relaxometry.Output.MaxDeviation_MinSig = RelaxOutputs.MaxDeviation_MinSig;
+%% Spectroscopy Analysis
 
 Results.Spectroscopy.ProcessedData.SpecDataFFT = fft(SpecSubtractedData);
 Results.Spectroscopy.ProcessedData.SpecDataL = length(SpecSubtractedData);
@@ -567,42 +660,37 @@ Results.Spectroscopy.ProcessedData.FFTMag1S = Results.Spectroscopy.ProcessedData
 Results.Spectroscopy.ProcessedData.FFTPhase = angle(Results.Spectroscopy.ProcessedData.SpecDataFFT(:));
 Results.Spectroscopy.ProcessedData.FFTPhase = Results.Spectroscopy.ProcessedData.FFTPhase(1:round(L/2));
 
-Results.Spectroscopy.ProcessedData.fVector = fsInterp*(0:(L/2))/L;
+Results.Spectroscopy.ProcessedData.fVector = fsInterp*(0:(L/2-1))/L;
 Results.Spectroscopy.ProcessedData.fVector =Results.Spectroscopy.ProcessedData.fVector(:); %making into a column
 fVec = Results.Spectroscopy.ProcessedData.fVector;
+F1Mag = Results.Spectroscopy.ProcessedData.FFTMag1S(fVec==fDrive);
+F3Mag = Results.Spectroscopy.ProcessedData.FFTMag1S(fVec==fDrive*3);
+
+Results.Spectroscopy.Output.NonlinearityIndex = F1Mag/F3Mag;
+figure,semilogy(fVec/fDrive,Results.Spectroscopy.ProcessedData.FFTMag1S)
 
 clear FFTMag2S
 
 
 %% Plotting and Exporting
+TmpStr = fieldnames(Results.Spectroscopy.Parameters);
+if not(strcmp(TmpStr{end},'DriveAmp_mT'))
+    Results.Spectroscopy.Parameters.DriveAmp_mT = Results.Relaxometry.Parameters.DriveAmp_mT;
+end
+[CompositeFig] = MPS_Composite_Fig_V1(SPION_Info,UserData,Results,'b');
 
-ResultsFig = figure('Position',[100,100,1200,800]);
+if StartTic==1
+    Results.TotalExperimentTime = toc;
+else
+    Results.TotalExperimentTime = 0;
+end
+StartTic=0;
+clear TmpStr
 
-% figure,plot(RelaxOutputs.BiasSig,RelaxOutputs.VelCorrectedSig/max(RelaxOutputs.VelCorrectedSig))
-% hold on
-MagnetizationAxes = axes('Position',[.55,.05,.4,.4]);
-plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.MaxSig_Bucket/max(RelaxOutputs.MaxSig_Bucket),'Color',RelaxColors.RProfileColor,'LineWidth',2)
-hold on
-plot(RelaxOutputs.MinSigBias_Bucket,abs(RelaxOutputs.MinSig_Bucket/max(abs(RelaxOutputs.MinSig_Bucket))),'Color',RelaxColors.LProfileColor,'LineWidth',2)
-plot(Data.BiasFieldVector,Data.Susceptibility/max(Data.Susceptibility),'LineWidth',2,'Color',RelaxColors.RawData)
-legend('Right scanning','Left scannning','Magnetometry')
+ExportData_V1(SPION_Info,UserData,Results,CompositeFig)
 
-dM_dH_Axes = axes('Position',[.55,.55,.4,.4]);
-plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.RMag_Output,'Color',RelaxColors.RProfileColor,'LineWidth',2)
-hold on
-plot(RelaxOutputs.MaxSigBias_Bucket,RelaxOutputs.LMag_Output,'Color',RelaxColors.LProfileColor,'LineWidth',2)
-plot(Data.BiasFieldVector(2:end),Data.Magnetization/max(abs(Data.Magnetization)),'LineWidth',2,'Color',RelaxColors.RawData)
-legend('Right scanning','Left scannning','Magnetometry')
-SinglePeriod_Axes = axes('Position',[.05,.05,.4,.4]);
-plot(DataMat(:,1),'LineWidth',2,'Color',RelaxColors.RawData)
-hold on
-plot(DataMat(:,2)-mean(DataMat(:,2)),'r','LineWidth',2)
-legend('Rx Signal','Bias Amplitude')
-
-
-
-ExportData_V1(SPION_Info,UserData,Results)
-
+Results.Relaxometry.Output.FWHM_MaxData
+Results.Relaxometry.Output.MaxDeviation_MaxSig
 
 %%
 function [data] = SendData(s,DriveAmp,BiasAmp,fs,PulseTime, fBias, fDrive)
@@ -617,7 +705,7 @@ BiasData = BiasFunk(timepts);
 
 queueOutputData(s,[[DriveData 0]',[BiasData 0]'])
 data = startForeground(s);
-data = data(1:end-1,:);
+data = data(1:end-2,:);
 
 
 end
