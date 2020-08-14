@@ -1,0 +1,22 @@
+MagParams,MagVals
+Sampling Freq.,1000000
+Interpolated Freq.,996300
+Drive Freq.,24300
+Bias Freq.,20
+Bias Waveform Shape,Sine
+Bias Amplitude (mT),45.1291
+Bias Amplitude (Volts),1.7495
+Bias Amplifier Name,RCF IPS700
+Bias Current Monitor Volts Per Amp,0.04
+Bias Field mT per Amp,6
+Drive Amplitude (mT),0.62081
+Drive Amplitude (Volts),0.042764
+Drive Amplifier Name,OPA549_Single_BoardRev2
+Drive Current Monitor Volts Per Amp,0.1
+Drive Field mT per Amp,2
+Power Supply Name,Tenma 72-7245
+Pre-Amplifier Name,INA217 V0
+Pre-Amplifier Gain,100
+Test Time,2
+Number of Averages,2
+Saturation Magnetization (\\mu_0 * A/m per kg/m^3),0.00041215

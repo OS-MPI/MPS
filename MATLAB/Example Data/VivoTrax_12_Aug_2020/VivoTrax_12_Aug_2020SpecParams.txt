@@ -1,0 +1,15 @@
+SpecParams,SpecVals
+Sampling Freq.,1000000
+Interpolated Freq.,996300
+Drive Freq.,24300
+Drive Amplitude (mT),4.5178
+Drive Amplitude (Volts),0.32073
+Drive Amplifier Name,OPA549_Single_BoardRev2
+Drive Current Monitor Volts Per Amp,0.1
+Drive Field mT per Amp,2
+Power Supply Name,Tenma 72-7245
+Pre-Amplifier Name,INA217 V0
+Pre-Amplifier Gain,100
+Test Time,2
+Number of Averages,2
+NonLinearity Index (F1/F3),7.755

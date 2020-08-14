@@ -1,0 +1,25 @@
+RelaxParams,RelaxVals
+Sampling Freq.,1000000
+Interpolated Freq.,996300
+Drive Freq.,24300
+Bias Freq.,20
+Bias Waveform Shape,Sine
+Bias Amplitude (mT),45.033
+Bias Amplitude (Volts),1.7495
+Bias Amplifier Name,RCF IPS700
+Bias Current Monitor Volts Per Amp,0.04
+Bias Field mT per Amp,6
+Drive Amplitude (mT),4.5202
+Drive Amplitude (Volts),0.32073
+Drive Amplifier Name,OPA549_Single_BoardRev2
+Drive Current Monitor Volts Per Amp,0.1
+Drive Field mT per Amp,2
+Power Supply Name,Tenma 72-7245
+Pre-Amplifier Name,INA217 V0
+Pre-Amplifier Gain,100
+Test Time,2
+Number of Averages,2
+Max Peak Deviation R Scan(mT),4.6556
+Max Peak Deviation L Scan(mT),-3.3237
+FWHM R Scanning(mT),7.8939
+FWHM L Scanning(mT),7.9373
