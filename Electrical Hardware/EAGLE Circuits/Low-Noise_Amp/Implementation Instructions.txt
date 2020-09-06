@@ -7,11 +7,8 @@ R10
 R27
 R26
 
+In this arrangement it has been tested and works well. I would not reccomend using the optional JFETs-- they were included on the board for experimentation, but do not help. 
 
-
-
-
-If you choose to use the two JFETs as common-source amplifiers prior to the INA217, you should pick the values for R23 and R24 such that they bias the drain voltage at the midpoint of the drain and source. The JFETs should also be picked such that they are a matched pair. If you plan to use these, open R26/27 and short R25/30.
 
 The value for R4 is flexible, but should be a high quality resistor (e.g. not carbon. Wirewound should be good), but it should be at least 20 Ohms to ensure amplifier stability. C5 also is flexible in terms of value, and just serves to bandwidth limit the amplifier to ~1MHz. 
 
