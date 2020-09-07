@@ -678,10 +678,11 @@ if not(strcmp(TmpStr{end},'DriveAmp_mT'))
     Results.Spectroscopy.Parameters.DriveAmp_mT = Results.Relaxometry.Parameters.DriveAmp_mT;
 end
 [CompositeFig] = MPS_Composite_Fig_V1(SPION_Info,UserData,Results,'b');
-
-if StartTic==1
+clear TmpStr
+TmpStr = fieldnames(Results);
+if StartTic==1 && not(strcmp(TmpStr{end},'TotalExperimentTime'))
     Results.TotalExperimentTime = toc;
-else
+elseif  not(strcmp(TmpStr{end},'TotalExperimentTime'))
     Results.TotalExperimentTime = 0;
 end
 StartTic=0;
