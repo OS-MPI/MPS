@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2021-05-13T01:40:08Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.5.2"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "OS-MPS_Preamp_V2_OnlyINA"
+        },
+        "Owner": "Eli Mattingly <ematting@mit.edu>",
+        "Size": {
+            "X": 66.655,
+            "Y": 55.55
+        }
+    }
+}

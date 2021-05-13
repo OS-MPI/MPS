@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2021-05-13T01:51:35Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.5.2"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "MPS_Drive_Amp_2"
+        },
+        "Owner": "Eli Mattingly <ematting@mit.edu>",
+        "Size": {
+            "X": 61.575,
+            "Y": 56.82
+        }
+    }
+}
