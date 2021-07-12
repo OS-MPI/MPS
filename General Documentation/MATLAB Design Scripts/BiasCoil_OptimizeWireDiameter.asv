@@ -6,11 +6,10 @@ set(0,'DefaultFigureWindowStyle','docked');
 
 % WireDList = .0001:.0001:.01; %The list of wire diameters to test
 Solenoid_Length_List = .1:.01:.2;
-Solenoid_Length_List = .16;
 WireDList= .00081; %Meters
 PlotOn =  not(length(WireDList)>1);
 CoilCost = zeros(1,length(WireDList));
-LayersPerBlock = 40; % A "Block" is a set of layers before an air gap
+LayersPerBlock = 5; % A "Block" is a set of layers before an air gap
 Rx_Length = .07; %Approx length of center-center between gradiometer halves
 
 
