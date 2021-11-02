@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name OS-MPS_Preamp_V2_OnlyINA)(type KiCad)(uri "$(KIPRJMOD)/OS-MPS_Preamp_V2_OnlyINA.pretty")(options "")(descr ""))
+)

@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name MPS_Drive_Amp_2-eagle-import)(type Legacy)(uri ${KIPRJMOD}/MPS_Drive_Amp_2-eagle-import.lib)(options "")(descr ""))
+)
