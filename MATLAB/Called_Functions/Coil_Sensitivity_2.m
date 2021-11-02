@@ -1,6 +1,10 @@
 function [P] = Coil_Sensitivity_2(Wire_D,LayerGap,Solenoid_Length,Turns,TubeDiam)
 % all units should be in meters
-
+% This function takes in the following parameters:
+% Wire_D is the wire diameter (meters)
+% Layer gap is the gap (meters) between layers. E.g. if there is a spacer
+% Length is the AXIAL length of the solenoid. (not length of wire)
+% Turns is the number of turns on the 
 
 TubeCircum = pi*TubeDiam;%meters
 
