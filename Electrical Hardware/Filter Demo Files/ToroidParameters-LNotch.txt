@@ -1,0 +1,25 @@
+
+Target inductance is: 156.0 μH
+Single-layer inductance is: 39.0 μH
+Wire diameter is: 1.25 mm
+
+FlatHeight     :12.49 mm
+MaxHeight      :22.05 mm
+RadiusAtPeak   :25.46 mm
+ID             :29.4 mm
+OD             :88.2 mm
+Turns          :141 Turns
+Layers         :2 
+WireLength     :15.93 meters
+WireResist     :0.2181 Ω
+
+
+Core Radius     :20.16 mm
+CenterRadius      :33.61 mm
+ID             :26.9 mm
+OD             :107.6 mm
+Turns          :135 Turns
+Layers         :2 
+WireLength     :17.12 meters
+WireResist     :0.2344 Ω
+
