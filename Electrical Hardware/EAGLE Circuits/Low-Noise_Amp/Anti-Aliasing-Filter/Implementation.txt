@@ -1,3 +1,0 @@
-To use the anti-aliasing filter ("AA-Filt") you should have the board built as designed but modify the values of the R,L, and C elements to make the filter have the cutoff and load that you want. Note, having a load impedance of ~1-2kOhms for the output of the opamp is probably a good target for low THD, but check the datasheet.
-
-It is advised that you use a high quality opamp such as the ADA4817 or similar as opposed to the TLV272. It is a standard footprint 
