@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name "AntiAlias Filter_Diff_Active")(type "KiCad")(uri "$(KIPRJMOD)/AntiAlias Filter_Diff_Active.pretty")(options "")(descr ""))
-)
