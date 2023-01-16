@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2021-06-08T01:17:58Z",
+        "GenerationSoftware": {
+            "Application": "EAGLE",
+            "Vendor": "Autodesk",
+            "Version": "9.5.2"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "AntiAlias Filter_Diff_Active"
+        },
+        "Owner": "Eli Mattingly <ematting@mit.edu>",
+        "Size": {
+            "X": 74.91,
+            "Y": 37.77
+        }
+    }
+}

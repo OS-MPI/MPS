@@ -1,3 +1,0 @@
-The preamp in this repository is a simple version. The more complex, but higher performing one is here: https://github.com/OS-MPI/MPI_Preamp/tree/main/Rx_Preamp
-
-The front-end filter should not necessarily be populated, and should be picked based on your application. 

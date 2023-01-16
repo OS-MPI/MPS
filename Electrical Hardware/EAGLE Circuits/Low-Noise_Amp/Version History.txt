@@ -1,0 +1,3 @@
+Version 1 was a trial board that included many options for experimentation using either the INA217 or the LT1115. The INA217 had better performance, but in order to work well, a few changes needed to be made. Mainly, we added resistors to ground (~2.2k) from both of the input terminals to remove the DC offset which occurs if there is no DC path to ground
+
+Version 2 removes unnecessary components and simplifies the design. 

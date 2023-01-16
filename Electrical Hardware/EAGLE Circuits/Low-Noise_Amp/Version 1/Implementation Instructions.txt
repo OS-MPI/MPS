@@ -1,0 +1,18 @@
+This circuit has not been implemented yet (albeit a similar version has utilizing only the INA217), and therefore it should not be considered a final product. Further, it was designed to allow flexibility in its applications, and as a result care must be taken to configure it properly. A number of the 0Ohm resistors are designed to act as semi-permanent switches to allow configuration. 
+
+To use the amplifier in the simplest mode (and most similar to the currently working circuit) the following 0 Ohm resistors should be shorted. ALL OTHERS SHOULD BE LEFT OPEN.
+
+R9
+R10
+R27
+R26
+
+In this arrangement it has been tested and works well. I would not reccomend using the optional JFETs-- they were included on the board for experimentation, but do not help. 
+
+
+The value for R4 is flexible, but should be a high quality resistor (e.g. not carbon. Wirewound should be good), but it should be at least 20 Ohms to ensure amplifier stability. C5 also is flexible in terms of value, and just serves to bandwidth limit the amplifier to ~1MHz. 
+
+R1,5,6,7 are available for the end-user to pick the values based on what gain you want. See the datasheet for the INA217 for the gain calculation.
+
+
+The second half of this circuit (based on LT1115) is still under development/testing.
