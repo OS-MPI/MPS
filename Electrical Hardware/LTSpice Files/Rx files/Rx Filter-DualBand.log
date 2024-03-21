@@ -1,0 +1,56 @@
+Circuit: * C:\Users\elima\OneDrive\Documents\GitHub\MPS\Electrical Hardware\LTSpice Files\Rx files\Rx Filter-DualBand.asc
+
+WARNING: Node N018 is floating.
+
+WARNING: Less than two connections to node N020.  This node is used by R7.
+Direct Newton iteration failed to find .op point.  (Use ".option noopiter" to skip.)
+Starting Gmin stepping
+Increasing initial diagonal Gmin to 100
+Gmin = 100
+vernier = 0.5
+Gmin = 18.6414
+vernier = 0.25
+vernier = 0.125
+vernier = 0.0625
+vernier = 0.03125
+vernier = 0.015625
+Gmin = 19.7379
+vernier = 0.0078125
+vernier = 0.00390625
+vernier = 0.00195313
+Gmin = 19.5941
+vernier = 0.000976563
+vernier = 0.000488281
+Gmin = 0
+Gmin stepping succeeded in finding the operating point.
+
+Ignoring empty pin current: Ix(u2:1)
+Ignoring empty pin current: Ix(u2:2)
+Ignoring empty pin current: Ix(u4:1)
+Ignoring empty pin current: Ix(u4:2)
+Ignoring empty pin current: Ix(u5:1)
+Ignoring empty pin current: Ix(u5:2)
+Ignoring empty pin current: Ix(u2:1)
+Ignoring empty pin current: Ix(u2:2)
+Ignoring empty pin current: Ix(u4:1)
+Ignoring empty pin current: Ix(u4:2)
+Ignoring empty pin current: Ix(u5:1)
+Ignoring empty pin current: Ix(u5:2)
+
+Date: Sun Dec 18 22:16:07 2022
+Total elapsed time: 0.373 seconds.
+
+tnom = 27
+temp = 27
+method = trap
+totiter = 1579
+traniter = 0
+tranpoints = 0
+accept = 0
+rejected = 0
+matrix size = 271
+fillins = 436
+solver = Normal
+Matrix Compiler1:    1366 opcodes
+Matrix Compiler2: 26.46 KB object code size  4.3/10.3/[1.4]
+
